@@ -1,0 +1,20 @@
+{
+  "name": "@hynote/server",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts", "./app": "./src/app.ts" },
+  "scripts": { "dev": "bun run --hot src/index.ts" },
+  "dependencies": {
+    "@ai-sdk/openai-compatible": "^1.0.0",
+    "@hono/zod-validator": "^0.8.0",
+    "@hynote/database": "workspace:*",
+    "@hynote/shared": "workspace:*",
+    "ai": "^6.0.197",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.12.23",
+    "yaml": "^2.6.1",
+    "zod": "^4.4.3"
+  }
+}
