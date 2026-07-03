@@ -1,0 +1,5 @@
+procs:
+  server:
+    cmd: ["bun", "run", "dev:server"]
+  cli:
+    cmd: ["bun", "run", "dev:cli"]
