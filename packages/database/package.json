@@ -1,0 +1,19 @@
+{
+  "name": "@hynote/database",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2",
+    "@libsql/client": "^0.14.0"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.30.5",
+    "dotenv": "^17.4.2"
+  }
+}
