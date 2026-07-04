@@ -1,4 +1,5 @@
-import { TextAttributes } from '@opentui/core';
+import { TextAttributes, type ScrollBoxRenderable } from '@opentui/core';
+import { useEffect, useRef } from 'react';
 import { InputBar } from './input-bar';
 import { Spinner } from './spinner';
 import type { Command } from './command-menu/types';
@@ -11,6 +12,7 @@ type Props = {
   loading?: boolean;
   interruptible?: boolean;
   commands: Command[];
+  scrollKey?: number;
 };
 
 export function SessionShell({
@@ -21,7 +23,13 @@ export function SessionShell({
   loading,
   interruptible = false,
   commands,
+  scrollKey,
 }: Props) {
+  const scrollRef = useRef<ScrollBoxRenderable>(null);
+  useEffect(() => {
+    const sb = scrollRef.current;
+    if (sb) sb.scrollTop = sb.scrollHeight;
+  }, [scrollKey]);
   return (
     <box
       flexDirection="column"
@@ -32,7 +40,7 @@ export function SessionShell({
       paddingX={2}
       gap={1}
     >
-      <scrollbox flexGrow={1} width="100%" stickyScroll stickyStart="bottom">
+      <scrollbox ref={scrollRef} flexGrow={1} width="100%" stickyScroll stickyStart="bottom">
         <box gap={1}>{children}</box>
       </scrollbox>
       <box flexShrink={0}>
