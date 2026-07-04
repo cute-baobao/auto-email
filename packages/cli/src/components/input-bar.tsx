@@ -154,6 +154,7 @@ export function InputBar({ onSubmit, disabled, commands }: Props) {
             onContentChange={handleTextareaContentChange}
             placeholder="Type a message..."
             keyBindings={TEXTAREA_KEY_BINDINGS}
+            maxHeight={8}
           />
           <StatusBar />
         </box>
