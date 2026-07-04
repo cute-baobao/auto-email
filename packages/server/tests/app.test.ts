@@ -175,6 +175,15 @@ describe('GET /api/templates', () => {
   });
 });
 
+describe('GET /api/health', () => {
+  it('returns 200 { ok: true }', async () => {
+    const app = createApp({ db, templatesDir, skillsDir, ai: fakeAi() });
+    const res = await app.request('/api/health');
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true });
+  });
+});
+
 describe('POST /api/reply then GET /api/stats', () => {
   it('persists a reply and reflects it in stats', async () => {
     const app = createApp({ db, templatesDir, skillsDir, ai: fakeAi() });

@@ -19,6 +19,8 @@ export interface AppDeps {
 export function createApp(deps: AppDeps) {
   const app = new Hono();
 
+  app.get('/api/health', (c) => c.json({ ok: true }));
+
   app.get('/api/skills', async (c) => {
     const skills = await loadSkills(deps.skillsDir);
     return c.json(skills.map((s) => ({ name: s.name, description: s.description, output: s.output })));
