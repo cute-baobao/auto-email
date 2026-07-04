@@ -2,6 +2,8 @@ import { sql } from 'drizzle-orm';
 import type { Db } from '@hynote/database';
 import type { StatsPanel } from '@hynote/shared';
 
+export class UnknownDimensionError extends Error {}
+
 const DIMENSION_WHITELIST = [
   'template',
   'promotion_date',
@@ -31,7 +33,7 @@ async function groupBy(db: Db, dimension: string): Promise<StatsPanel> {
 export async function queryStats(db: Db, dimension?: string): Promise<StatsPanel[]> {
   if (dimension) {
     if (!DIMENSION_WHITELIST.includes(dimension)) {
-      throw new Error(`Unknown stats dimension: ${dimension}`);
+      throw new UnknownDimensionError(`Unknown stats dimension: ${dimension}`);
     }
     return [await groupBy(db, dimension)];
   }

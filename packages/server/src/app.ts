@@ -5,7 +5,7 @@ import { replies, type Db } from '@hynote/database';
 import type { AiPort } from './agent/ai-port';
 import { loadSkills } from './agent/skill';
 import { buildToolRegistry, pickTools } from './agent/tools/index';
-import { queryStats } from './services/stats';
+import { queryStats, UnknownDimensionError } from './services/stats';
 
 export interface AppDeps {
   db: Db;
@@ -24,6 +24,9 @@ export function createApp(deps: AppDeps) {
 
   app.post('/api/run', zValidator('json', RunRequestSchema), async (c) => {
     const { input, skill: skillName } = c.req.valid('json');
+    // Error policy: filesystem/skill-loading failures (loadSkills, outside the
+    // try) surface as 500. AI routing/run failures inside the try return 502
+    // with { fallback: 'manual' } so the CLI can offer manual template selection.
     const skills = await loadSkills(deps.skillsDir);
     try {
       let chosen = skillName ? skills.find((s) => s.name === skillName) : undefined;
@@ -63,7 +66,10 @@ export function createApp(deps: AppDeps) {
       const panels = await queryStats(deps.db, dimension);
       return c.json({ type: 'stats', panels });
     } catch (e) {
-      return c.json({ error: (e as Error).message }, 400);
+      if (e instanceof UnknownDimensionError) {
+        return c.json({ error: e.message }, 400);
+      }
+      throw e;
     }
   });
 

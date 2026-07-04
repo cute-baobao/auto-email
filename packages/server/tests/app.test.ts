@@ -65,6 +65,64 @@ describe('POST /api/run', () => {
     expect(res.status).toBe(502);
     expect((await res.json()).fallback).toBe('manual');
   });
+  it('routes via ai.routeSkill when no skill is provided', async () => {
+    let routed = false;
+    const app = createApp({
+      db, templatesDir, skillsDir,
+      ai: fakeAi({
+        async routeSkill(_input, skills) {
+          routed = true;
+          return skills.find((s) => s.name === 'reply')!.name;
+        },
+      }),
+    });
+    const res = await app.request('/api/run', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ input: 'promote on youtube' }),
+    });
+    expect(res.status).toBe(200);
+    expect(routed).toBe(true);
+    const body = (await res.json()) as RunResponse;
+    expect(body).toMatchObject({ type: 'reply', template: 'kol-media-support' });
+  });
+  it('returns 400 with fallback:manual for an unknown explicit skill', async () => {
+    const app = createApp({ db, templatesDir, skillsDir, ai: fakeAi() });
+    const res = await app.request('/api/run', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ input: 'x', skill: 'nope' }),
+    });
+    expect(res.status).toBe(400);
+    expect((await res.json()).fallback).toBe('manual');
+  });
+  it('returns 400 when input is missing (zValidator rejects)', async () => {
+    const app = createApp({ db, templatesDir, skillsDir, ai: fakeAi() });
+    const res = await app.request('/api/run', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ input: '' }),
+    });
+    expect(res.status).toBe(400);
+  });
+  it('forwards a text-typed runSkill response unchanged', async () => {
+    const app = createApp({
+      db, templatesDir, skillsDir,
+      ai: fakeAi({
+        async runSkill(skill) {
+          return { type: 'text', skill: skill.name, text: 'plain answer' };
+        },
+      }),
+    });
+    const res = await app.request('/api/run', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ input: 'x', skill: 'reply' }),
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as RunResponse;
+    expect(body).toMatchObject({ type: 'text', text: 'plain answer' });
+  });
 });
 
 describe('POST /api/reply then GET /api/stats', () => {
@@ -79,5 +137,10 @@ describe('POST /api/reply then GET /api/stats', () => {
     const stats = await app.request('/api/stats?dimension=platform');
     const body = (await stats.json()) as { panels: { rows: { label: string; count: number }[] }[] };
     expect(body.panels[0]!.rows.find((r) => r.label === 'YouTube')!.count).toBeGreaterThanOrEqual(1);
+  });
+  it('returns 400 for an unknown stats dimension', async () => {
+    const app = createApp({ db, templatesDir, skillsDir, ai: fakeAi() });
+    const res = await app.request('/api/stats?dimension=not_allowed');
+    expect(res.status).toBe(400);
   });
 });
