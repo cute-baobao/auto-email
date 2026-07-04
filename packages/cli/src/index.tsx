@@ -1,10 +1,13 @@
 #!/usr/bin/env bun
 import { createCliRenderer } from '@opentui/core';
 import { createRoot } from '@opentui/react';
-import { Repl } from './repl';
+import { createMemoryRouter, RouterProvider } from 'react-router';
+import { RootLayout } from './layouts/root-layout';
+import { Repl } from './screens/repl';
 
-const renderer = await createCliRenderer({
-  targetFps: 30,
-  exitOnCtrlC: true,
-});
-createRoot(renderer).render(<Repl />);
+const router = createMemoryRouter([
+  { path: '/', element: <RootLayout />, children: [{ index: true, element: <Repl /> }] },
+]);
+
+const renderer = await createCliRenderer({ targetFps: 60, exitOnCtrlC: false });
+createRoot(renderer).render(<RouterProvider router={router} />);
