@@ -1,10 +1,11 @@
 import type { ToolSet } from 'ai';
 import type { Db } from '@hynote/database';
+import { systemTools } from './system';
 import { templateTools } from './template';
 import { dbTools } from './db';
 
 export function buildToolRegistry(deps: { templatesDir: string; db: Db }): ToolSet {
-  return { ...templateTools(deps.templatesDir), ...dbTools(deps.db) } as ToolSet;
+  return { ...systemTools(), ...templateTools(deps.templatesDir), ...dbTools(deps.db) } as ToolSet;
 }
 
 export function pickTools(registry: ToolSet, allowed: string[]): ToolSet {
