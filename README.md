@@ -1,6 +1,6 @@
 # Auto Email (`auto-email          # 从仓库源码运行，自动起后端，路径解析正常`)
 
-一个常驻终端（TUI）的邮件回复助手：粘贴一封 HyNote Affiliate 邮件，AI 自动选模板、填变量、提取统计标签，你确认后一键复制并入库；也能查回复统计。底层是本地 Hono server + Cloudflare D1，AI 走 DeepSeek（流式，带 thinking）。
+一个常驻终端（TUI）的邮件回复助手：粘贴一封 Affiliate 邮件，AI 自动选模板、填变量、提取统计标签，你确认后一键复制并入库；也能查回复统计。底层是本地 Hono server + Cloudflare D1，AI 走 DeepSeek（流式，带 thinking）。
 
 - **一条命令启动**：`auto-email          # 从仓库源码运行，自动起后端，路径解析正常` 会自动把后端也拉起来（无需单独跑 server）。
 - **UI**：ascii 头部、主题可切换、流式渲染（思考/工具/正文）、确认走输入区选项菜单。
