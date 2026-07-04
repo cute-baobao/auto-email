@@ -507,8 +507,13 @@ Expected: PASS.
 - [ ] **Step 1: Write `packages/database/drizzle.config.ts`**
 
 ```ts
-import 'dotenv/config';
+import { config } from 'dotenv';
 import { defineConfig } from 'drizzle-kit';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
+
+const here = dirname(fileURLToPath(import.meta.url));
+config({ path: resolve(here, '../../.env') });
 
 export default defineConfig({
   out: './drizzle',
