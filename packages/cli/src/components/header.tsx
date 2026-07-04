@@ -1,5 +1,3 @@
-import { ASCIIFont } from '@opentui/core';
-
 export function Header() {
   return (
     <box justifyContent="center" alignItems="center">
