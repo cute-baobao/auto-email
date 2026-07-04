@@ -203,3 +203,18 @@ describe('POST /api/reply then GET /api/stats', () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe('POST /api/execute', () => {
+  it('executes a db-insert action', async () => {
+    const app = createApp({ db, templatesDir, skillsDir, ai: fakeAi() });
+    const res = await app.request('/api/execute', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ action: 'db-insert', table: 'replies', values: { template: 'test', replyContent: 'x' } }),
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { inserted: number; id: string };
+    expect(body.inserted).toBe(1);
+    expect(body.id).toMatch(/[0-9a-f-]{36}/);
+  });
+});

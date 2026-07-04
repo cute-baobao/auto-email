@@ -6,6 +6,7 @@ import { replies, type Db } from '@hynote/database';
 import type { AiPort } from './agent/ai-port';
 import { loadSkills } from './agent/skill';
 import { buildToolRegistry, pickTools } from './agent/tools/index';
+import { insertRow, queryRows } from './agent/tools/db';
 import { queryStats, UnknownDimensionError } from './services/stats';
 import { listTemplates, getTemplate } from './services/template';
 
@@ -125,6 +126,23 @@ export function createApp(deps: AppDeps) {
         return c.json({ error: e.message }, 400);
       }
       throw e;
+    }
+  });
+
+  app.post('/api/execute', async (c) => {
+    const body = await c.req.json<{ action: string; table: string; values?: Record<string, string | number | null>; query?: Record<string, unknown> }>();
+    try {
+      if (body.action === 'db-insert') {
+        const out = await insertRow(deps.db, body.table!, body.values ?? {});
+        return c.json(out);
+      }
+      if (body.action === 'db-query') {
+        const out = await queryRows(deps.db, body.table!, body.query as any ?? {});
+        return c.json(out);
+      }
+      return c.json({ error: `Unknown action: ${body.action}` }, 400);
+    } catch (e) {
+      return c.json({ error: (e as Error).message }, 400);
     }
   });
 
