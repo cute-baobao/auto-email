@@ -14,6 +14,8 @@
 
 **Test layout convention:** Every package keeps its Vitest test files in a flat `tests/` folder at the package root (e.g. `packages/server/tests/template.test.ts`), NOT colocated next to sources. Test files import the code under test with a `../src/...` relative path. The root `vitest.config.ts` glob `packages/**/*.test.ts` already discovers them.
 
+**Node types:** Packages use `node:*` builtins (`fs/promises`, `os`, `path`, `url`) and global `fetch`, so `@types/node` is a root devDependency and `tsconfig.base.json` sets `"types": ["node"]` explicitly (auto-inclusion is unreliable under `moduleResolution: "bundler"` in this monorepo). The `react` module and `@opentui/react` JSX resolve via normal module resolution + `jsxImportSource`, so they do NOT need to be in the `types` array.
+
 **Run all commands from the repo root** `/Users/bao/data/code/hynote-email-agent` unless stated otherwise.
 
 ---
@@ -42,6 +44,7 @@
     "db:push": "bun run --cwd packages/database db:push"
   },
   "devDependencies": {
+    "@types/node": "^26.1.0",
     "@types/react": "^19.2.15",
     "bun-types": "^1.3.14",
     "mprocs": "^0.9.3",
@@ -63,6 +66,7 @@
     "jsxImportSource": "@opentui/react",
     "allowJs": true,
     "moduleResolution": "bundler",
+    "types": ["node"],
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
