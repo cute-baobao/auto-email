@@ -3,6 +3,7 @@ import { createDeepSeek, type DeepSeekLanguageModelOptions } from '@ai-sdk/deeps
 import { z, type ZodType } from 'zod';
 import type { AppConfig, SkillManifest, RunResponse } from '@hynote/shared';
 import type { AiPort } from '../agent/ai-port';
+import { describeSchema } from '@hynote/database';
 
 const DEEPSEEK_PROVIDER_OPTIONS = {
   deepseek: {
@@ -77,6 +78,12 @@ async function generateJson<T>(
   return schema.parse(extractJsonObject(text));
 }
 
+function systemFor(skill: SkillManifest): string {
+  return skill.allowedTools.includes('db_insert')
+    ? `${skill.body}\n\n${describeSchema()}`
+    : skill.body;
+}
+
 export function createAiService(config: AppConfig): AiPort {
   const model = resolveModel(config);
   return {
@@ -95,7 +102,7 @@ export function createAiService(config: AppConfig): AiPort {
     async runSkill(skill, input, tools) {
       const gen = await generateText({
         model,
-        system: skill.body,
+        system: systemFor(skill),
         prompt: input,
         tools,
         stopWhen: stepCountIs(6),
@@ -110,7 +117,7 @@ export function createAiService(config: AppConfig): AiPort {
       ];
       if (skill.output === 'reply') {
         const parsed = await generateJson(model, replyOutputSchema, {
-          system: skill.body,
+          system: systemFor(skill),
           messages: finalMessages(REPLY_SHAPE),
         });
         const metadata: Record<string, string> = {};
@@ -128,7 +135,7 @@ export function createAiService(config: AppConfig): AiPort {
         };
       }
       const parsed = await generateJson(model, statsOutputSchema, {
-        system: skill.body,
+        system: systemFor(skill),
         messages: finalMessages(STATS_SHAPE),
       });
       return { type: 'stats', skill: skill.name, panels: parsed.panels };
@@ -136,7 +143,7 @@ export function createAiService(config: AppConfig): AiPort {
     async *streamSkill(skill, input, tools, signal) {
       const result = streamText({
         model,
-        system: skill.body,
+        system: systemFor(skill),
         prompt: input,
         tools,
         stopWhen: stepCountIs(6),
@@ -176,7 +183,7 @@ export function createAiService(config: AppConfig): AiPort {
       }
       if (skill.output === 'reply') {
         const parsed = await generateJson(model, replyOutputSchema, {
-          system: skill.body,
+          system: systemFor(skill),
           messages: [...messages, { role: 'user', content: REPLY_SHAPE + JSON_INSTRUCTION }],
           signal,
         });
@@ -199,7 +206,7 @@ export function createAiService(config: AppConfig): AiPort {
         return;
       }
       const parsed = await generateJson(model, statsOutputSchema, {
-        system: skill.body,
+        system: systemFor(skill),
         messages: [...messages, { role: 'user', content: STATS_SHAPE + JSON_INSTRUCTION }],
         signal,
       });
