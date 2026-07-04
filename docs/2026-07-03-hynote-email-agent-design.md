@@ -410,6 +410,8 @@ OPENAI_API_KEY=sk-xxx
 
 - 通过 Vercel AI SDK 的 OpenAI 兼容接口，支持任意 provider；API key 从 `.env` 读取，config.json 只声明用哪个 provider / model / base_url
 
+> **更新（2026-07-04，见 `docs/2026-07-04-streaming-design.md`）**：provider 已简化为 **deepseek-only**（`@ai-sdk/deepseek`，开启 `thinking`）。`OPENAI_API_KEY` 不再使用，`DEFAULT_CONFIG` 只留 `deepseek`。新增 `POST /api/run/stream`（SSE）流式推送 reasoning/text/tool 进度 + 最终 `result` 事件；`/api/run` 非流式保留。已用真实 key 实测 **DeepSeek thinking + 工具调用可并存**（reasoning-delta 与 tool-call 同时出现，最终结构化 reply 正确），无需降级。
+
 ---
 
 ## 10. Cloudflare D1 + Drizzle 接入（按官方文档）
