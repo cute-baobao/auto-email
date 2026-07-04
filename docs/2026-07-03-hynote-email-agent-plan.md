@@ -2008,6 +2008,39 @@ git add -A && git commit -m "docs: README + install; green test/typecheck gate"
 
 ---
 
+## Phase 10 — Design-coverage gaps (added after final review)
+
+The plan's Phases 0-9 shipped the core, but a final review found three design requirements (§5.4, §5/§7, §3) that were under-specified and not built. Phase 10 closes them.
+
+### Task 10.1: `/api/templates` endpoint + client `listTemplates` + manual-fallback signal (TDD)
+
+**Files:** modify `packages/server/src/app.ts`, `packages/server/tests/app.test.ts`, `packages/cli/src/client.ts`.
+
+- Server: add `GET /api/templates` → `{ templates: [{ name, body }] }`, where `name` comes from `listTemplates(deps.templatesDir)` and `body` from `getTemplate(deps.templatesDir, name)`. TDD: assert the 4 bundled templates are returned with bodies containing `{{firstName}}`.
+- Client: add `listTemplates(): Promise<{ name: string; body: string }[]>` hitting `GET /api/templates`. Add `export class ManualFallbackError extends Error {}`; in `runSkill`, when the response is not ok AND its JSON body has `fallback === 'manual'`, throw `ManualFallbackError` (carry the message) so the REPL can enter manual mode instead of just printing text.
+
+### Task 10.2: REPL reply editing (§5.4) — manual verification
+
+**Files:** modify `packages/cli/src/repl.tsx`, `packages/cli/src/renderers/reply.tsx`.
+
+- When a `reply` result is shown, `Ctrl+E` loads the current reply text into the `<textarea>` for editing; submitting while in edit mode replaces the pending reply's text (keeping template + metadata + sender). The confirm hint documents Ctrl+E (edit) alongside Ctrl+Y (confirm+copy+save) / Ctrl+N (cancel). Metadata tags remain as extracted (correcting them is out of scope for this pass; note it in-code).
+
+### Task 10.3: REPL manual-template fallback (§5/§7) — manual verification
+
+**Files:** modify `packages/cli/src/repl.tsx` (+ a small picker renderer if useful).
+
+- Catch `ManualFallbackError` from `runSkill`; fetch `listTemplates()`; render the template names as a numbered/selectable list; on pick, load that template's `body` into the edit buffer (reuses the Task 10.2 edit flow) so the user fills `{{firstName}}` and confirms via the normal reply confirm path. Status line explains the fallback.
+
+### Task 10.4: dynamic slash menu from `/api/skills` (§3) — manual verification
+
+**Files:** modify `packages/cli/src/repl.tsx`.
+
+- On mount, call `listSkills()`; show the available slash commands (e.g. `/reply`, `/stats`, plus any custom skills) in the header/hint area. Non-blocking if the server isn't up yet (fall back to a static hint).
+
+**Verification for 10.2-10.4:** `bunx tsc -p packages/cli/tsconfig.json --noEmit` clean + `bun build packages/cli/src/index.tsx --target bun --outdir /tmp/hynote-cli-build` succeeds (interactive TUI not runnable headless). 10.1 is covered by Vitest.
+
+---
+
 ## Self-Review Notes (author checklist — already applied)
 
 - **Spec coverage:** REPL + slash + AI routing (Task 7.1 `/api/run` routing branch, Task 8.1/8.3); SKILL.md format + loader (Phase 5); tool registry + `allowed_tools` permission boundary (Phase 4, `pickTools`); built-in reply/stats skills (Task 3.1); template `{{firstName}}` + 4 templates + hardcoded signature (Task 3.1/3.2); D1 sqlite-proxy runtime + drizzle-kit d1-http migration (Phase 2); secrets in `.env`, non-secret config.json (Task 7.2); `email_content` column + store original (Task 2.1 schema, Task 7.1 reply route); 3 preset + dynamic dimension stats with whitelist (Task 3.3); AI-failure → 502 `fallback:manual` + manual template selection (Task 7.1 test, Task 8.3 status); Vitest e2e for every API with AI faked + libsql db isolation (Phase 7); `bun link` + mprocs (Phase 0, 9); history command intentionally absent.
