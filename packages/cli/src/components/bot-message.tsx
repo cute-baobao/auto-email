@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTheme } from '../providers/theme';
 
 export type AutoEmailMessagePart =
+  | { type: 'skill'; skill: string }
   | { type: 'reasoning'; text: string }
   | { type: 'tool'; id: string; name: string; status: 'calling' | 'done' }
   | { type: 'text'; text: string };
@@ -64,6 +65,34 @@ export function BotMessage({
       {groupConsecutiveParts(parts).map((group) => (
         <box key={group.key} paddingY={1} width="100%">
           {group.parts.map((part, j) => {
+            if (part.type === 'skill') {
+              return (
+                <box
+                  key={`skill-${j}`}
+                  border={['left']}
+                  borderColor={colors.primary}
+                  customBorderChars={{
+                    topLeft: '',
+                    bottomLeft: '',
+                    vertical: '│',
+                    topRight: '',
+                    bottomRight: '',
+                    horizontal: ' ',
+                    bottomT: '',
+                    topT: '',
+                    cross: '',
+                    leftT: '',
+                    rightT: '',
+                  }}
+                  width="100%"
+                  paddingX={2}
+                >
+                  <text attributes={TextAttributes.DIM}>
+                    <em fg={colors.primary}>Using skill: </em>{part.skill}
+                  </text>
+                </box>
+              );
+            }
             if (part.type === 'reasoning') {
               return (
                 <box
@@ -164,7 +193,9 @@ export function BotMessage({
 export function eventsToParts(events: RunStreamEvent[]): AutoEmailMessagePart[] {
   const parts: AutoEmailMessagePart[] = [];
   for (const ev of events) {
-    if (ev.type === 'reasoning-delta') {
+    if (ev.type === 'skill-selected') {
+      parts.push({ type: 'skill', skill: ev.skill });
+    } else if (ev.type === 'reasoning-delta') {
       const last = parts[parts.length - 1];
       if (last?.type === 'reasoning') {
         last.text += ev.text;
