@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createTestDb } from '@hynote/database/test';
 import { replies } from '@hynote/database';
-import { queryStats } from '../src/services/stats';
+import { queryStats, normalizeStatsRow } from '../src/services/stats';
 
 async function seed() {
   const db = await createTestDb();
@@ -27,5 +27,17 @@ describe('queryStats', () => {
   });
   it('rejects a non-whitelisted dimension', async () => {
     await expect(queryStats(await seed(), 'evil; DROP TABLE')).rejects.toThrow();
+  });
+});
+
+describe('normalizeStatsRow', () => {
+  it('reads object rows (libsql shape)', () => {
+    expect(normalizeStatsRow({ value: 'YouTube', count: 3 })).toEqual({ value: 'YouTube', count: 3 });
+  });
+  it('reads positional array rows (D1 sqlite-proxy shape)', () => {
+    expect(normalizeStatsRow(['YouTube', 3])).toEqual({ value: 'YouTube', count: 3 });
+  });
+  it('keeps a null group value as null', () => {
+    expect(normalizeStatsRow([null, 2])).toEqual({ value: null, count: 2 });
   });
 });

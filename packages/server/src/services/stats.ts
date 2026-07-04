@@ -4,6 +4,15 @@ import type { StatsPanel } from '@hynote/shared';
 
 export class UnknownDimensionError extends Error {}
 
+// `db.all(sql`raw`)` yields objects under libsql (tests) but positional arrays
+// under the D1 sqlite-proxy (production). Normalize both to {value, count}.
+export function normalizeStatsRow(row: unknown): { value: string | null; count: number } {
+  const [value, count] = Array.isArray(row)
+    ? [row[0], row[1]]
+    : [(row as Record<string, unknown>).value, (row as Record<string, unknown>).count];
+  return { value: (value as string | null) ?? null, count: Number(count) };
+}
+
 const DIMENSION_WHITELIST = [
   'template',
   'promotion_date',
@@ -17,16 +26,19 @@ async function groupBy(db: Db, dimension: string): Promise<StatsPanel> {
     dimension === 'template'
       ? sql`template`
       : sql`json_extract(metadata, ${'$.' + dimension})`;
-  const rows = await db.all<{ value: string | null; count: number }>(sql`
+  const rows = (await db.all(sql`
     SELECT ${expr} AS value, COUNT(*) AS count
     FROM replies
     WHERE ${expr} IS NOT NULL
     GROUP BY 1
     ORDER BY count DESC
-  `);
+  `)) as unknown[];
   return {
     title: dimension,
-    rows: rows.map((r) => ({ label: r.value ?? '未明确', count: Number(r.count) })),
+    rows: rows.map((row) => {
+      const { value, count } = normalizeStatsRow(row);
+      return { label: value ?? '未明确', count };
+    }),
   };
 }
 
