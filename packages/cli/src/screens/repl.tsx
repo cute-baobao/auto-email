@@ -438,7 +438,7 @@ export function Repl() {
         if (turn.reply && shouldConfirm(turn.reply)) {
           parts.push({ type: 'text', text: turn.reply.reply });
         }
-        const showBot = parts.length > 0 || turn.streaming;
+        const showBot = parts.length > 0;
         return (
           <box key={turn.id} flexDirection="column" width="100%">
             {turn.input && <UserMessage message={turn.input} />}
