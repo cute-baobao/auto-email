@@ -100,10 +100,10 @@ When done, reply in one line with how many rows you inserted.
 `routeSkill` 列出所有已加载技能，record 加入后即可被选中；无需改路由代码。`/api/skills` 会多出 `record`（`/record` 出现在命令菜单，可接受）。
 
 ## 4. 立即任务：记录这 7 个 ID
-实现完成后（需真实 `.env`），dogfood：向 `hynote` 发「把这些 partner 记录到数据库：787598579, 261872805, 893014664, 6ece.0358, 258141459, 679652778, uisehsj72」→ 路由到 record → 每个 `db_insert` 一行（template='partner'、emailName=ID、metadata={"status":"applied"}）。全部照原样。
+实现完成后（需真实 `.env`），dogfood：向 `auto-email` 发「把这些 partner 记录到数据库：787598579, 261872805, 893014664, 6ece.0358, 258141459, 679652778, uisehsj72」→ 路由到 record → 每个 `db_insert` 一行（template='partner'、emailName=ID、metadata={"status":"applied"}）。全部照原样。
 
 ## 5. 测试 / 验证
-- `packages/server/tests/db-insert.test.ts`（用 `@hynote/database/test` `createTestDb`）：
+- `packages/server/tests/db-insert.test.ts`（用 `@auto-email/database/test` `createTestDb`）：
   - 合法插入（自动 id + template='partner' + emailName）→ 行入库、返回 id；
   - 未知表 → 抛错；未知列 → 抛错；缺 `template`（NOT NULL 无默认）→ 抛错；
   - 只 insert（无 update/delete 工具存在）。

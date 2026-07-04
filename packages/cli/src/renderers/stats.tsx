@@ -1,5 +1,5 @@
 import { TextAttributes } from '@opentui/core';
-import type { StatsPanel } from '@hynote/shared';
+import type { StatsPanel } from '@auto-email/shared';
 import { useTheme } from '../providers/theme';
 
 function barFor(count: number, max: number): string {

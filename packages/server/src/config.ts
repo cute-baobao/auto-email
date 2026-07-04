@@ -2,7 +2,7 @@ import { homedir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mkdir, cp, readFile, writeFile, access } from 'node:fs/promises';
-import { AppConfigSchema, type AppConfig } from '@hynote/shared';
+import { AppConfigSchema, type AppConfig } from '@auto-email/shared';
 
 const ASSETS = join(dirname(fileURLToPath(import.meta.url)), 'assets');
 

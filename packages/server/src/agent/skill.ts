@@ -1,7 +1,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { parse as parseYaml } from 'yaml';
-import type { SkillManifest, SkillOutput } from '@hynote/shared';
+import type { SkillManifest, SkillOutput } from '@auto-email/shared';
 
 export function parseSkill(raw: string): SkillManifest {
   const m = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);

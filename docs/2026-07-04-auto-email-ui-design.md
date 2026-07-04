@@ -2,11 +2,11 @@
 
 > 日期：2026-07-04
 > 类型：CLI（`packages/cli`）UI 重构，server 端零改动
-> 参考：baocode `packages/cli`（真实源码 + 用户提供的 `bot-message.tsx`）、`docs/2026-07-03-hynote-email-agent-design.md`
+> 参考：baocode `packages/cli`（真实源码 + 用户提供的 `bot-message.tsx`）、`docs/2026-07-03-auto-email-email-agent-design.md`
 
 ## 1. 目标与范围
 
-把 Auto Email 的终端 UI **完全对齐 baocode 的外观与渲染标准**：主题系统、provider 分层、ascii-font 头部、parts 分组的消息渲染（Thinking/工具/正文）、左竖条 InputBar、底部状态行。**server 端不改**（沿用 `/api/run/stream` 等）。品牌显示从 "HyNote" 改为 **"Auto Email"**。
+把 Auto Email 的终端 UI **完全对齐 baocode 的外观与渲染标准**：主题系统、provider 分层、ascii-font 头部、parts 分组的消息渲染（Thinking/工具/正文）、左竖条 InputBar、底部状态行。**server 端不改**（沿用 `/api/run/stream` 等）。品牌显示从 "auto-email" 改为 **"Auto Email"**。
 
 **范围**：仅 `packages/cli`。现有 `client.ts` / `slash.ts` / server 逻辑不动。
 
@@ -31,7 +31,7 @@
 - **reasoning**：`<box border={['left']} borderColor={colors.thinkingBorder} customBorderChars={{...EmptyBorder, vertical:'│'}} paddingX={2}>` 内 `<text attributes={DIM}><em fg={colors.thinking}>Thinking:</em> {text}</text>`
 - **tool**：同款左竖条框，`<em fg={colors.info}>{formatToolName(name)}:</em> {args}`，`status==='calling'` 追加 ` …`。`formatToolName`：`template_fill` → `Template Fill`（下划线/驼峰转空格 + 首字母大写）
 - **text**：`<box paddingX={3}>` 内 `<markdown syntaxStyle={syntaxStyle} content={text} streaming={streaming} />`；`SyntaxStyle.create()` 注册 `markup.strong`(bold)/`markup.link`(info 色)/`markup.raw`(success 色)
-- **底部元数据行**：`◉`（`colors.primary`）+ `provider › model`（hynote 无 Build/Plan mode，用 provider/model 替代 baocode 的 mode）+ streaming 时追加 `› streaming…`
+- **底部元数据行**：`◉`（`colors.primary`）+ `provider › model`（auto-email 无 Build/Plan mode，用 provider/model 替代 baocode 的 mode）+ streaming 时追加 `› streaming…`
 
 **流事件 → parts 适配器** `eventsToParts(events)`：`reasoning-delta`/`text-delta` 累加进末尾同类型 part；`tool-call` push `{type:'tool', id, name, status:'calling'}`；`tool-result` 按 `toolCallId` 把对应 tool 置 `done`。（替代当前 `ProgressView` + `ProgressState`。）
 
@@ -47,10 +47,10 @@
 ```
 ThemeProvider > KeyboardLayerProvider > ToastProvider > DialogProvider > ThemeRoot > <Outlet/>
 ```
-（对齐 baocode，去掉 hynote 用不到的 PromptConfigProvider。）
+（对齐 baocode，去掉 auto-email 用不到的 PromptConfigProvider。）
 `index.tsx`：`createCliRenderer` + `createRoot` + `createMemoryRouter([{ path:'/', element:<RootLayout/>, children:[{ index:true, element:<Repl/> }] }])`。
 
-`providers/keyboard-layer`、`providers/toast`、`providers/dialog`：搬 baocode 对应实现，改命名空间（`@baocode`→`@hynote`），去掉领域耦合（MODE 等）。
+`providers/keyboard-layer`、`providers/toast`、`providers/dialog`：搬 baocode 对应实现，改命名空间（`@baocode`→`@auto-email`），去掉领域耦合（MODE 等）。
 
 ## 6. 组件清单（`packages/cli/src`）
 
@@ -110,7 +110,7 @@ client.ts / slash.ts     不变
 ## 10. 测试 / 验证
 
 - 现有 `slash` / `client` / `client-stream` 单测**不变**（40 个）。
-- CLI 是 TUI，无新增自动化 UI 测试；验证 = `bunx tsc -p packages/cli/tsconfig.json --noEmit` 干净 + `bun build packages/cli/src/index.tsx` 成功 + 真实 `hynote` 跑通（流式渲染、主题切换、toast、dialog 选模板）。
+- CLI 是 TUI，无新增自动化 UI 测试；验证 = `bunx tsc -p packages/cli/tsconfig.json --noEmit` 干净 + `bun build packages/cli/src/index.tsx` 成功 + 真实 `auto-email` 跑通（流式渲染、主题切换、toast、dialog 选模板）。
 
 ## 11. 风险
 

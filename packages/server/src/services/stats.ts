@@ -1,6 +1,6 @@
 import { sql, count, desc, type SQL } from 'drizzle-orm';
-import { replies, type Db } from '@hynote/database';
-import type { StatsPanel } from '@hynote/shared';
+import { replies, type Db } from '@auto-email/database';
+import type { StatsPanel } from '@auto-email/shared';
 
 export class UnknownDimensionError extends Error {}
 

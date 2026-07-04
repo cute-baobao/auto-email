@@ -29,7 +29,7 @@
 
 ### 3.2 CLI 纯函数 `packages/cli/src/should-confirm.ts`（新）
 ```ts
-import type { RunResponse } from '@hynote/shared';
+import type { RunResponse } from '@auto-email/shared';
 
 // 是否需要「确认并复制」流程：仅当结果是一封真实回复（reply 且 template 非空）。
 export function shouldConfirm(res: RunResponse): boolean {

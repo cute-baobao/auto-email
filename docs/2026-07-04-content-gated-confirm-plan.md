@@ -6,7 +6,7 @@
 
 **Architecture:** New pure `shouldConfirm(res)` in the CLI gates `setPending`; the bundled (and seeded) `reply/SKILL.md` prompt tells the model to leave `template` empty for non-emails. Server code + schema unchanged.
 
-**Tech Stack:** `@hynote/shared` types, React, TypeScript, Vitest. Run from repo root. Existing 48 tests stay green.
+**Tech Stack:** `@auto-email/shared` types, React, TypeScript, Vitest. Run from repo root. Existing 48 tests stay green.
 
 **Spec:** `docs/2026-07-04-content-gated-confirm-design.md`.
 
@@ -20,7 +20,7 @@
 
 ```ts
 import { describe, it, expect } from 'vitest';
-import type { RunResponse } from '@hynote/shared';
+import type { RunResponse } from '@auto-email/shared';
 import { shouldConfirm } from '../src/should-confirm';
 
 const reply = (template: string): RunResponse => ({
@@ -52,7 +52,7 @@ Expected: FAIL — cannot find `../src/should-confirm`.
 - [ ] **Step 3: Create `packages/cli/src/should-confirm.ts`**:
 
 ```ts
-import type { RunResponse } from '@hynote/shared';
+import type { RunResponse } from '@auto-email/shared';
 
 // Whether to enter the confirm/copy flow: only a real reply (reply with a non-empty template).
 export function shouldConfirm(res: RunResponse): boolean {

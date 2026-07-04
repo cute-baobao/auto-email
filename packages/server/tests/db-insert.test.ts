@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { createTestDb } from '@hynote/database/test';
-import { replies } from '@hynote/database';
+import { createTestDb } from '@auto-email/database/test';
+import { replies } from '@auto-email/database';
 import { insertRow, queryRows } from '../src/agent/tools/db';
 
 describe('insertRow', () => {

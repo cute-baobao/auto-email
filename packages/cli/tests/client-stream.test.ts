@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { runSkillStream } from '../src/client';
-import type { RunStreamEvent } from '@hynote/shared';
+import type { RunStreamEvent } from '@auto-email/shared';
 
 afterEach(() => vi.restoreAllMocks());
 

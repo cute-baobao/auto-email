@@ -212,7 +212,7 @@ git add packages/server && git commit -m "refactor(server): deepseek-only provid
 
 ```ts
 import type { ToolSet } from 'ai';
-import type { SkillManifest, RunResponse, RunStreamEvent } from '@hynote/shared';
+import type { SkillManifest, RunResponse, RunStreamEvent } from '@auto-email/shared';
 
 export interface AiPort {
   routeSkill(input: string, skills: SkillManifest[]): Promise<string>;
@@ -443,7 +443,7 @@ Expected: installed.
 ```ts
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { runSkillStream } from '../src/client';
-import type { RunStreamEvent } from '@hynote/shared';
+import type { RunStreamEvent } from '@auto-email/shared';
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -489,7 +489,7 @@ Expected: FAIL — `runSkillStream` not exported.
 
 - [ ] **Step 4: Add `runSkillStream` to `packages/cli/src/client.ts`**
 
-Add imports at top: `import { EventSourceParserStream } from 'eventsource-parser/stream';` and add `RunStreamEvent`, `RunStreamEventSchema` to the shared imports (`RunStreamEventSchema` is a value, import from `@hynote/shared`). Then:
+Add imports at top: `import { EventSourceParserStream } from 'eventsource-parser/stream';` and add `RunStreamEvent`, `RunStreamEventSchema` to the shared imports (`RunStreamEventSchema` is a value, import from `@auto-email/shared`). Then:
 
 ```ts
 export async function runSkillStream(
@@ -583,7 +583,7 @@ export function ProgressView({ state }: { state: ProgressState }) {
 - [ ] **Step 2: Wire streaming into `packages/cli/src/repl.tsx`**
 
 Changes (keep all existing edit/confirm/manual-pick logic):
-1. Imports: add `runSkillStream` to the `./client` import; `import { ProgressView, type ProgressState } from './renderers/progress';`; add `RunStreamEvent` to the `@hynote/shared` type import.
+1. Imports: add `runSkillStream` to the `./client` import; `import { ProgressView, type ProgressState } from './renderers/progress';`; add `RunStreamEvent` to the `@auto-email/shared` type import.
 2. State + refs:
 
 ```ts

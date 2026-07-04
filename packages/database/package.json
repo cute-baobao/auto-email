@@ -1,5 +1,5 @@
 {
-  "name": "@hynote/database",
+  "name": "@auto-email/database",
   "version": "0.0.1",
   "private": true,
   "type": "module",

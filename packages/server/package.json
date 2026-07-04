@@ -1,5 +1,5 @@
 {
-  "name": "@hynote/server",
+  "name": "@auto-email/server",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -8,8 +8,8 @@
   "dependencies": {
     "@ai-sdk/deepseek": "^2.0.35",
     "@hono/zod-validator": "^0.8.0",
-    "@hynote/database": "workspace:*",
-    "@hynote/shared": "workspace:*",
+    "@auto-email/database": "workspace:*",
+    "@auto-email/shared": "workspace:*",
     "ai": "^6.0.197",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",

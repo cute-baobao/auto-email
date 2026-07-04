@@ -15,7 +15,7 @@
 
 | 文件 | 改动 |
 |---|---|
-| `packages/server/src/services/stats.ts` | 重写 `groupBy` 用 `db.select({ value, count: count() }).from(replies).where(...).groupBy(...).orderBy(desc(count()))`；**删除** `normalizeStatsRow` 函数及其注释；imports 增加 `count, desc`（drizzle-orm）+ `replies`（@hynote/database），移除不再需要的部分 |
+| `packages/server/src/services/stats.ts` | 重写 `groupBy` 用 `db.select({ value, count: count() }).from(replies).where(...).groupBy(...).orderBy(desc(count()))`；**删除** `normalizeStatsRow` 函数及其注释；imports 增加 `count, desc`（drizzle-orm）+ `replies`（@auto-email/database），移除不再需要的部分 |
 | `packages/server/tests/stats.test.ts` | 移除 `normalizeStatsRow` 的 import 与对应 `describe` 块（3 个用例）；保留 `queryStats` 的 3 个用例（预置面板、动态维度、白名单拒绝）不变 |
 
 **不变**：`queryStats` 签名、`UnknownDimensionError`、`DIMENSION_WHITELIST`；因此 `app.ts`、`agent/tools/db.ts` 等所有调用方无需改动。
@@ -24,8 +24,8 @@
 
 ```ts
 import { sql, count, desc, type SQL } from 'drizzle-orm';
-import { replies, type Db } from '@hynote/database';
-import type { StatsPanel } from '@hynote/shared';
+import { replies, type Db } from '@auto-email/database';
+import type { StatsPanel } from '@auto-email/shared';
 
 async function groupBy(db: Db, dimension: string): Promise<StatsPanel> {
   const valueExpr: SQL<string | null> =

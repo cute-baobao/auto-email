@@ -1,4 +1,4 @@
-import type { RunResponse } from '@hynote/shared';
+import type { RunResponse } from '@auto-email/shared';
 
 // Whether to enter the confirm/copy flow: only a real reply (reply with a non-empty template).
 export function shouldConfirm(res: RunResponse): boolean {

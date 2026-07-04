@@ -6,7 +6,7 @@
 
 **Architecture:** (A) new pure `shouldConfirm` gates `setPending`; reply skill prompt returns empty `template` for non-emails. (B) `SessionShell` gets a scrollbox ref + `scrollKey` prop and scrolls to bottom in an effect; `Repl` bumps `scrollKey` on every turn change.
 
-**Tech Stack:** `@hynote/shared`, `@opentui`, React, TypeScript, Vitest. Run from repo root. Existing 48 tests stay green.
+**Tech Stack:** `@auto-email/shared`, `@opentui`, React, TypeScript, Vitest. Run from repo root. Existing 48 tests stay green.
 
 **Spec:** `docs/2026-07-04-cli-confirm-autoscroll-design.md`.
 
@@ -20,7 +20,7 @@
 
 ```ts
 import { describe, it, expect } from 'vitest';
-import type { RunResponse } from '@hynote/shared';
+import type { RunResponse } from '@auto-email/shared';
 import { shouldConfirm } from '../src/should-confirm';
 
 const reply = (template: string): RunResponse => ({
@@ -49,7 +49,7 @@ describe('shouldConfirm', () => {
 - [ ] **Step 3: Create `packages/cli/src/should-confirm.ts`**:
 
 ```ts
-import type { RunResponse } from '@hynote/shared';
+import type { RunResponse } from '@auto-email/shared';
 
 // Whether to enter the confirm/copy flow: only a real reply (reply with a non-empty template).
 export function shouldConfirm(res: RunResponse): boolean {

@@ -1,7 +1,7 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import { getTableColumns, eq, ne, gt, gte, lt, lte, like, and, desc } from 'drizzle-orm';
-import { WRITABLE_TABLES, type Db } from '@hynote/database';
+import { WRITABLE_TABLES, type Db } from '@auto-email/database';
 import { queryStats } from '../../services/stats';
 
 export async function insertRow(

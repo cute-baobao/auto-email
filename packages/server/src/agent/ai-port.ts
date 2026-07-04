@@ -1,5 +1,5 @@
 import type { ToolSet } from 'ai';
-import type { SkillManifest, RunResponse, RunStreamEvent } from '@hynote/shared';
+import type { SkillManifest, RunResponse, RunStreamEvent } from '@auto-email/shared';
 
 export interface AiPort {
   routeSkill(input: string, skills: SkillManifest[]): Promise<string>;

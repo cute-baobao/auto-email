@@ -8,9 +8,9 @@
 
 **Tech Stack:** Bun, TypeScript, `@opentui/core`+`@opentui/react` 0.2.16 (SyntaxStyle, Markdown, ASCIIFont, spinner), `opentui-spinner`, `react-router`, Zod, Vitest.
 
-**Spec:** `docs/2026-07-04-auto-email-ui-design.md`. **Reference source (copy from):** `/Users/bao/data/code/baocode/packages/cli/src/`. **Verify UI via** tsc + `bun build packages/cli/src/index.tsx` + live `hynote` run (no automated UI tests). Existing 40 tests (slash/client/client-stream) must stay green throughout.
+**Spec:** `docs/2026-07-04-auto-email-ui-design.md`. **Reference source (copy from):** `/Users/bao/data/code/baocode/packages/cli/src/`. **Verify UI via** tsc + `bun build packages/cli/src/index.tsx` + live `auto-email` run (no automated UI tests). Existing 40 tests (slash/client/client-stream) must stay green throughout.
 
-> **Porting convention:** "Copy baocode `<src>` → `<dst>`, apply edits" means: read the baocode file, write it to the hynote path with ONLY the listed edits. baocode is the chosen visual standard; verbatim copy is the goal. After each task run `bunx tsc -p packages/cli/tsconfig.json --noEmit`.
+> **Porting convention:** "Copy baocode `<src>` → `<dst>`, apply edits" means: read the baocode file, write it to the auto-email path with ONLY the listed edits. baocode is the chosen visual standard; verbatim copy is the goal. After each task run `bunx tsc -p packages/cli/tsconfig.json --noEmit`.
 
 > **Drafts already on disk (uncommitted, validated against @opentui 0.2.16 API):** `theme.ts`, `providers/theme/index.tsx`, `components/bot-message.tsx`, `components/header.tsx`, `components/status-bar.tsx`. Tasks below finalize/keep them.
 
@@ -22,7 +22,7 @@
 
 **Files:** Modify `packages/cli/package.json`
 
-- [ ] **Step 1:** Add to `dependencies`: `"@opentui/core": "^0.2.16"` (if not pinned there already — currently `^0.2.10`, bump to `^0.2.16`), `"opentui-spinner": "^0.0.6"`, `"react-router": "^7.15.1"`. Keep existing (`@hynote/shared`, `@opentui/react`, `clipboardy`, `eventsource-parser`, `react`).
+- [ ] **Step 1:** Add to `dependencies`: `"@opentui/core": "^0.2.16"` (if not pinned there already — currently `^0.2.10`, bump to `^0.2.16`), `"opentui-spinner": "^0.0.6"`, `"react-router": "^7.15.1"`. Keep existing (`@auto-email/shared`, `@opentui/react`, `clipboardy`, `eventsource-parser`, `react`).
 - [ ] **Step 2:** Run `bun install`. Expected: installs opentui-spinner + react-router.
 - [ ] **Step 3:** Run `bun run test` → 40 pass (unaffected). Commit: `chore(cli): add opentui-spinner + react-router`.
 
@@ -47,7 +47,7 @@
 
 **Files:** Create `packages/cli/src/providers/keyboard-layer/index.tsx`
 
-- [ ] **Step 1:** Copy baocode `providers/keyboard-layer/index.tsx` → hynote path. Edit: in `enum LayerName` remove the `Mention = "mention"` member (keep `Base`, `Command`, `Dialog`). Everything else verbatim (Ctrl+C responder stack, `push/pop/isTopLayer/setResponder`, `useKeyboardLayer`).
+- [ ] **Step 1:** Copy baocode `providers/keyboard-layer/index.tsx` → auto-email path. Edit: in `enum LayerName` remove the `Mention = "mention"` member (keep `Base`, `Command`, `Dialog`). Everything else verbatim (Ctrl+C responder stack, `push/pop/isTopLayer/setResponder`, `useKeyboardLayer`).
 - [ ] **Step 2:** `bunx tsc` clean. Commit: `feat(cli): port keyboard-layer provider`.
 
 ### Task A5: toast + dialog providers (verbatim)
@@ -86,7 +86,7 @@ export function Spinner() {
 
 **Files:** Keep `packages/cli/src/components/bot-message.tsx` (draft)
 
-- [ ] **Step 1:** Verify the drafted `bot-message.tsx` matches spec §3 exactly: `HynoteMessagePart` union (reasoning/tool/text), `groupConsecutiveParts`, `formatToolName` (underscore/camel → "Title Case"), reasoning+tool as `│` left-bar DIM boxes (`customBorderChars` vertical `│`), `Thinking:`/tool-name `<em>` in `colors.thinking`/`colors.info`, text via `<markdown syntaxStyle content streaming>`, footer `◉ provider › model`. Also exports `eventsToParts(events)`.
+- [ ] **Step 1:** Verify the drafted `bot-message.tsx` matches spec §3 exactly: `auto-emailMessagePart` union (reasoning/tool/text), `groupConsecutiveParts`, `formatToolName` (underscore/camel → "Title Case"), reasoning+tool as `│` left-bar DIM boxes (`customBorderChars` vertical `│`), `Thinking:`/tool-name `<em>` in `colors.thinking`/`colors.info`, text via `<markdown syntaxStyle content streaming>`, footer `◉ provider › model`. Also exports `eventsToParts(events)`.
 - [ ] **Step 2:** `bunx tsc` clean (SyntaxStyle/markdown/em all resolve). Commit: `feat(cli): BotMessage part-grouped renderer`.
 
 ---
@@ -242,7 +242,7 @@ export function CommandMenu({
 
 **Files:** Create `packages/cli/src/components/input-bar.tsx`
 
-- [ ] **Step 1:** Copy baocode `components/input-bar.tsx` → hynote path, then DELETE all mention machinery: the `MentionMatch`/`MentionCandidate` types, `isWithinCurrentDirectory`/`isMentionQueryCharacter`/`findActiveMention`/`getMentionCandidates`/`FileMentionMenu`, all `activeMention*`/`mention*` state/refs/effects, the `LayerName.Mention` usage, `handleTextareaCursorChange`, and the mention `useKeyboard` block. Keep: the `<textarea>` (ref, `onContentChange`, `placeholder`, `keyBindings` submit/newline), the command-menu integration (`useCommandMenu(commands)` — new signature takes commands), the split-border `┃` left accent (`border={['left']}` + `customBorderChars` vertical `┃` from `SplitBorderChars`), `<StatusBar/>`, and `onSubmit` via `textarea.plainText`.
+- [ ] **Step 1:** Copy baocode `components/input-bar.tsx` → auto-email path, then DELETE all mention machinery: the `MentionMatch`/`MentionCandidate` types, `isWithinCurrentDirectory`/`isMentionQueryCharacter`/`findActiveMention`/`getMentionCandidates`/`FileMentionMenu`, all `activeMention*`/`mention*` state/refs/effects, the `LayerName.Mention` usage, `handleTextareaCursorChange`, and the mention `useKeyboard` block. Keep: the `<textarea>` (ref, `onContentChange`, `placeholder`, `keyBindings` submit/newline), the command-menu integration (`useCommandMenu(commands)` — new signature takes commands), the split-border `┃` left accent (`border={['left']}` + `customBorderChars` vertical `┃` from `SplitBorderChars`), `<StatusBar/>`, and `onSubmit` via `textarea.plainText`.
 - [ ] **Step 2:** Change signature to `InputBar({ onSubmit, disabled, commands }: { onSubmit: (text: string) => void; disabled?: boolean; commands: Command[] })`. Remove all `usePromptConfig`/`MODE`/`toggleMode`/tab-mode bits. The command execute path: on selecting a command, `textarea.insertText('/' + cmd.name + ' ')` (or set text) so the user then types/pastes the arg — do NOT execute a mode action (baocode's `handleCommand` action machinery is dropped). Keep `useKeyboardLayer` `LayerName.Base` responder that clears the textarea on Ctrl+C.
 - [ ] **Step 3:** `bunx tsc` clean. Commit: `feat(cli): InputBar (baocode style, no mentions)`.
 
@@ -264,7 +264,7 @@ export function CommandMenu({
 **Files:** Create `packages/cli/src/components/dialog-search-list.tsx`, `packages/cli/src/components/dialogs/theme-dialog.tsx`
 
 - [ ] **Step 1:** Copy baocode `components/dialog-search-list.tsx` verbatim (generic searchable select list; deps: theme, keyboard-layer, @opentui). If it imports anything baocode-specific, minimize; else verbatim.
-- [ ] **Step 2:** Copy baocode `components/dialogs/theme-dialog.tsx`, adapt to hynote: use `useTheme().allThemes` + `setTheme`, render each theme name (with a swatch of its `primary`), on select `setTheme(theme)` + `dialog.close()`.
+- [ ] **Step 2:** Copy baocode `components/dialogs/theme-dialog.tsx`, adapt to auto-email: use `useTheme().allThemes` + `setTheme`, render each theme name (with a swatch of its `primary`), on select `setTheme(theme)` + `dialog.close()`.
 - [ ] **Step 3:** `bunx tsc` clean. Commit: `feat(cli): dialog-search-list + theme dialog`.
 
 ### Task D2: template picker dialog
@@ -315,7 +315,7 @@ export function ReplyMeta({ metadata }: { metadata: Record<string, string> }) {
 
 Wire everything. Structure:
 - Load skills on mount (`listSkills()`) → build `commands: Command[]` (`{ name, description }`) for the command menu.
-- `messages` state: an array where each entry is `{ parts: HynoteMessagePart[]; reply?: ReplyResult; kind: 'stream' }`. During streaming, accumulate `events[]` → `eventsToParts` for the live message; on `result`: for `reply`, append the reply body as a `text` part AND stash the reply for `ReplyMeta` + confirm; for `stats` render `<StatsView>`; for `text`, the text part already streamed.
+- `messages` state: an array where each entry is `{ parts: auto-emailMessagePart[]; reply?: ReplyResult; kind: 'stream' }`. During streaming, accumulate `events[]` → `eventsToParts` for the live message; on `result`: for `reply`, append the reply body as a `text` part AND stash the reply for `ReplyMeta` + confirm; for `stats` render `<StatsView>`; for `text`, the text part already streamed.
 - Submit via `runSkillStream(input, skill, onEvent, signal)`; `onEvent` pushes to the current message's events and re-renders `<BotMessage parts streaming>`.
 - `Ctrl+Y` confirm → `saveReply` + `clipboard.write` → `toast.show({ message: '已复制并保存', variant: 'success' })`.
 - `Ctrl+E` edit / `Ctrl+N` cancel (existing logic).
@@ -398,4 +398,4 @@ createRoot(renderer).render(<RouterProvider router={router} />);
 
 - **Spec coverage:** theme system + persistence (A3); providers theme/keyboard-layer/toast/dialog (A3–A5); ascii-font "Auto Email" tiny (B1, spec §6); BotMessage exact rendering standard §3 (B2); InputBar no-mentions + command menu from skills (C1–C2); SessionShell + status row (C3, B1 status-bar); dialogs for theme + template (D1–D2); reply=markdown text part + pills + DIM hint / stats themed / Option A (E1–E2); toast on confirm, Esc cancel, manual-pick→dialog, Ctrl+T theme (E2); router skeleton single screen (E3); server untouched; existing 40 tests preserved (all phases).
 - **Placeholder scan:** none — full code for new logic; ports specify exact source path + exact edits. "Copy baocode X, apply edits" is the deliberate porting method (baocode is the chosen standard), not deferred work.
-- **Type consistency:** `Command` = `{name, description}` used identically in command-menu types/hook/index/input-bar. `HynoteMessagePart` + `eventsToParts` (bot-message) consumed by Repl. `LayerName` (Base/Command/Dialog, no Mention) consistent across keyboard-layer/dialog/command-menu/input-bar. `useTheme()` `{colors, allThemes, setTheme}` consistent. `ReplyMeta({metadata})` / `StatsView({panels})` signatures match Repl call sites.
+- **Type consistency:** `Command` = `{name, description}` used identically in command-menu types/hook/index/input-bar. `auto-emailMessagePart` + `eventsToParts` (bot-message) consumed by Repl. `LayerName` (Base/Command/Dialog, no Mention) consistent across keyboard-layer/dialog/command-menu/input-bar. `useTheme()` `{colors, allThemes, setTheme}` consistent. `ReplyMeta({metadata})` / `StatsView({panels})` signatures match Repl call sites.

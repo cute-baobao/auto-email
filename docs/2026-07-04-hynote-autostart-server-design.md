@@ -1,4 +1,4 @@
-# hynote 自启动后端 + /api/health — 设计（spec）
+# auto-email 自启动后端 + /api/health — 设计（spec）
 
 > 日期：2026-07-04
 > 类型：CLI 启动优化 + server 加一个 health 路由
@@ -6,13 +6,13 @@
 
 ## 1. 目标
 
-`hynote` 一条命令同时把后端起起来：CLI 启动时探测端口，已有 server 就复用，否则 spawn 一个子进程跑 server，就绪后再渲染 TUI，CLI 退出时连带 kill 自己 spawn 的 server。新增一个专用 `/api/health` 存活探测接口。
+`auto-email` 一条命令同时把后端起起来：CLI 启动时探测端口，已有 server 就复用，否则 spawn 一个子进程跑 server，就绪后再渲染 TUI，CLI 退出时连带 kill 自己 spawn 的 server。新增一个专用 `/api/health` 存活探测接口。
 
 ## 2. 决策
 
 | 议题 | 决定 |
 |---|---|
-| 启动方式 | spawn 子进程（不在 CLI 进程内起 server，CLI 不 import @hynote/server） |
+| 启动方式 | spawn 子进程（不在 CLI 进程内起 server，CLI 不 import @auto-email/server） |
 | 端口已占 | 先探测：已有 server 响应 → 复用（不 spawn、不管其生命周期）；无 → spawn |
 | 探测接口 | 专用 `GET /api/health` → 200 `{ ok: true }`（不读盘/不调 AI） |
 | 日志 | 子进程 stdout/stderr 追加写 `~/.bao-auto-mail/server.log` |
@@ -42,7 +42,7 @@ import { fileURLToPath } from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url)); // packages/cli/src
 const SERVER_ENTRY = resolve(HERE, '../../server/src/index.ts');
 const REPO_ROOT = resolve(HERE, '../../..');
-const PORT = Number(process.env.HYNOTE_PORT ?? 45678);
+const PORT = Number(process.env.AUTO_EMAIL_PORT ?? 45678);
 const CONFIG_DIR = join(homedir(), '.bao-auto-mail');
 const LOG_PATH = join(CONFIG_DIR, 'server.log');
 
@@ -103,15 +103,15 @@ createRoot(renderer).render(<RouterProvider router={router} />);
 
 ## 4. 依赖
 
-无新增。spawn 用 Bun 全局 API；不 import @hynote/server（CLI 包依赖不变）。
+无新增。spawn 用 Bun 全局 API；不 import @auto-email/server（CLI 包依赖不变）。
 
 ## 5. 测试 / 验证
 
 - 单测 `packages/cli/tests/server-boot.test.ts`：mock `fetch` → `probeServer` 在 2xx 时返回 true、abort/非 ok 时 false。
 - `/api/health` 端到端测试（`packages/server/tests/app.test.ts`）：`GET /api/health` → 200 且 body `{ ok: true }`。
 - spawn/就绪/清理/复用：真实终端验证——
-  - 直接 `hynote`：应自动起 server（首次约数秒）再进 TUI；`~/.bao-auto-mail/server.log` 有 server 输出；Ctrl+C 退出后该 server 进程被 kill（`lsof -i:45678` 无残留）。
-  - 先 `bun run dev:server` 再 `hynote`：应复用、不 spawn、退出不杀 dev server。
+  - 直接 `auto-email`：应自动起 server（首次约数秒）再进 TUI；`~/.bao-auto-mail/server.log` 有 server 输出；Ctrl+C 退出后该 server 进程被 kill（`lsof -i:45678` 无残留）。
+  - 先 `bun run dev:server` 再 `auto-email`：应复用、不 spawn、退出不杀 dev server。
 
 ## 6. 改动文件
 
@@ -125,7 +125,7 @@ createRoot(renderer).render(<RouterProvider router={router} />);
 
 ## 7. 风险
 
-- **软链路径解析**：`hynote` 经 `bun link` 全局安装后，`import.meta.url` 是否解析成 repo 真实路径。若为软链路径导致 `../../server` 找不到 → 改为从 `HERE` 向上查找含 `packages/server` 的 workspace 根。实现时实测（`hynote` 全局跑一次）。
+- **软链路径解析**：`auto-email` 经 `bun link` 全局安装后，`import.meta.url` 是否解析成 repo 真实路径。若为软链路径导致 `../../server` 找不到 → 改为从 `HERE` 向上查找含 `packages/server` 的 workspace 根。实现时实测（`auto-email` 全局跑一次）。
 - **`bun` 运行 .ts 入口**：`process.execPath` 是当前 bun；spawn `bun server/src/index.ts` 直接跑 TS，OK。
 - **就绪超时**：D1 凭证缺失时 server 启动即抛错并写 server.log；probe 一直失败 → 10s 超时报错，提示看日志（符合预期）。
 - **清理时机**：opentui Ctrl+C 走 keyboard-layer → `renderer.destroy()` → 进程退出 → `process.on('exit')` kill 子进程；额外挂 SIGINT/SIGTERM 兜底。

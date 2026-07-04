@@ -1,20 +1,20 @@
-import type { RunStreamEvent } from '@hynote/shared';
+import type { RunStreamEvent } from '@auto-email/shared';
 import { SyntaxStyle, TextAttributes } from '@opentui/core';
 import { useState } from 'react';
 import { useTheme } from '../providers/theme';
 
-export type HynoteMessagePart =
+export type AutoEmailMessagePart =
   | { type: 'reasoning'; text: string }
   | { type: 'tool'; id: string; name: string; status: 'calling' | 'done' }
   | { type: 'text'; text: string };
 
 type PartGroup = {
-  type: HynoteMessagePart['type'];
-  parts: HynoteMessagePart[];
+  type: AutoEmailMessagePart['type'];
+  parts: AutoEmailMessagePart[];
   key: string;
 };
 
-function groupConsecutiveParts(parts: HynoteMessagePart[]): PartGroup[] {
+function groupConsecutiveParts(parts: AutoEmailMessagePart[]): PartGroup[] {
   const groups: PartGroup[] = [];
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i]!;
@@ -45,7 +45,7 @@ export function BotMessage({
   model,
   streaming = false,
 }: {
-  parts: HynoteMessagePart[];
+  parts: AutoEmailMessagePart[];
   provider: string;
   model: string;
   streaming?: boolean;
@@ -161,8 +161,8 @@ export function BotMessage({
   );
 }
 
-export function eventsToParts(events: RunStreamEvent[]): HynoteMessagePart[] {
-  const parts: HynoteMessagePart[] = [];
+export function eventsToParts(events: RunStreamEvent[]): AutoEmailMessagePart[] {
+  const parts: AutoEmailMessagePart[] = [];
   for (const ev of events) {
     if (ev.type === 'reasoning-delta') {
       const last = parts[parts.length - 1];

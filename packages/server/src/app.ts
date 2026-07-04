@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
 import { zValidator } from '@hono/zod-validator';
-import { RunRequestSchema, ReplyRecordSchema } from '@hynote/shared';
-import { replies, type Db } from '@hynote/database';
+import { RunRequestSchema, ReplyRecordSchema } from '@auto-email/shared';
+import { replies, type Db } from '@auto-email/database';
 import type { AiPort } from './agent/ai-port';
 import { loadSkills } from './agent/skill';
 import { buildToolRegistry, pickTools } from './agent/tools/index';

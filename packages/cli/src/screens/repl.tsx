@@ -2,7 +2,7 @@ import { TextAttributes, type TextareaRenderable } from '@opentui/core';
 import { useKeyboard } from '@opentui/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import clipboard from 'clipboardy';
-import type { RunResponse, RunStreamEvent, StatsPanel } from '@hynote/shared';
+import type { RunResponse, RunStreamEvent, StatsPanel } from '@auto-email/shared';
 import { parseInput } from '../slash';
 import { shouldConfirm } from '../should-confirm';
 import {
@@ -17,7 +17,7 @@ import {
 import {
   BotMessage,
   eventsToParts,
-  type HynoteMessagePart,
+  type AutoEmailMessagePart,
 } from '../components/bot-message';
 import { ReplyMeta } from '../renderers/reply';
 import { ReviewCard } from '../renderers/review';
@@ -486,7 +486,7 @@ export function Repl() {
     >
       <Header />
       {turns.map((turn) => {
-        const parts: HynoteMessagePart[] = eventsToParts(turn.events);
+        const parts: AutoEmailMessagePart[] = eventsToParts(turn.events);
         // Only the canonical filled reply (real email = non-empty template) is
         // appended; a non-email reply's conversational text already streamed in.
         if (turn.reply && shouldConfirm(turn.reply)) {

@@ -1,11 +1,11 @@
 {
-  "name": "@hynote/cli",
+  "name": "@auto-email/cli",
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "bin": { "hynote": "./src/index.tsx" },
+  "bin": { "auto-email": "./src/index.tsx" },
   "dependencies": {
-    "@hynote/shared": "workspace:*",
+    "@auto-email/shared": "workspace:*",
     "@opentui/core": "^0.2.16",
     "@opentui/react": "^0.2.10",
     "clipboardy": "^4.0.0",

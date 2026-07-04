@@ -1,9 +1,9 @@
 import { generateText, streamText, stepCountIs, type ModelMessage } from 'ai';
 import { createDeepSeek, type DeepSeekLanguageModelOptions } from '@ai-sdk/deepseek';
 import { z, type ZodType } from 'zod';
-import type { AppConfig, SkillManifest, RunResponse } from '@hynote/shared';
+import type { AppConfig, SkillManifest, RunResponse } from '@auto-email/shared';
 import type { AiPort } from '../agent/ai-port';
-import { describeSchema } from '@hynote/database';
+import { describeSchema } from '@auto-email/database';
 
 const DEEPSEEK_PROVIDER_OPTIONS = {
   deepseek: {

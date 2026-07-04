@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { createTestDb } from '@hynote/database/test';
-import { replies, type Db } from '@hynote/database';
+import { createTestDb } from '@auto-email/database/test';
+import { replies, type Db } from '@auto-email/database';
 import type { AiPort } from '../src/agent/ai-port';
-import type { RunResponse, SkillManifest } from '@hynote/shared';
+import type { RunResponse, SkillManifest } from '@auto-email/shared';
 import { createApp } from '../src/app';
 
 const assets = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'assets');

@@ -14,13 +14,13 @@
       },
     },
     "packages/cli": {
-      "name": "@hynote/cli",
+      "name": "@auto-email/cli",
       "version": "0.0.1",
       "bin": {
-        "hynote": "./src/index.tsx",
+        "auto-email": "./src/index.tsx",
       },
       "dependencies": {
-        "@hynote/shared": "workspace:*",
+        "@auto-email/shared": "workspace:*",
         "@opentui/core": "^0.2.16",
         "@opentui/react": "^0.2.10",
         "clipboardy": "^4.0.0",
@@ -31,7 +31,7 @@
       },
     },
     "packages/database": {
-      "name": "@hynote/database",
+      "name": "@auto-email/database",
       "version": "0.0.1",
       "dependencies": {
         "drizzle-orm": "^0.45.2",
@@ -43,13 +43,13 @@
       },
     },
     "packages/server": {
-      "name": "@hynote/server",
+      "name": "@auto-email/server",
       "version": "0.0.1",
       "dependencies": {
         "@ai-sdk/deepseek": "^2.0.35",
+        "@auto-email/database": "workspace:*",
+        "@auto-email/shared": "workspace:*",
         "@hono/zod-validator": "^0.8.0",
-        "@hynote/database": "workspace:*",
-        "@hynote/shared": "workspace:*",
         "ai": "^6.0.197",
         "dotenv": "^17.4.2",
         "drizzle-orm": "^0.45.2",
@@ -59,7 +59,7 @@
       },
     },
     "packages/shared": {
-      "name": "@hynote/shared",
+      "name": "@auto-email/shared",
       "version": "0.0.1",
       "dependencies": {
         "zod": "^4.4.3",
@@ -74,6 +74,14 @@
     "@ai-sdk/provider": ["@ai-sdk/provider@3.0.13", "", { "dependencies": { "json-schema": "^0.4.0" } }, "sha512-ZPtVYt5QIJzOta1kdUiDuCx4HhFkvNPv/rvmZ2b1iXwybYjJsCnNYR4PAw4kW7rgVfDARvHXcU64efWuqNp6bw=="],
 
     "@ai-sdk/provider-utils": ["@ai-sdk/provider-utils@4.0.35", "", { "dependencies": { "@ai-sdk/provider": "3.0.13", "@standard-schema/spec": "^1.1.0", "eventsource-parser": "^3.0.8" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-bjYld/2KGPLt78kpqbya+fD4LYS7BqVQJyUjE3qAHrYB0FR2Q90BaWEVIBZaguTWXf/A8L6uG1zO1v9TxVlGWg=="],
+
+    "@auto-email/cli": ["@auto-email/cli@workspace:packages/cli"],
+
+    "@auto-email/database": ["@auto-email/database@workspace:packages/database"],
+
+    "@auto-email/server": ["@auto-email/server@workspace:packages/server"],
+
+    "@auto-email/shared": ["@auto-email/shared@workspace:packages/shared"],
 
     "@drizzle-team/brocli": ["@drizzle-team/brocli@0.10.2", "", {}, "sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w=="],
 
@@ -134,14 +142,6 @@
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.19.12", "", { "os": "win32", "cpu": "x64" }, "sha512-T1QyPSDCyMXaO3pzBkF96E8xMkiRYbUEZADd29SyPGabqxMViNoii+NcK7eWJAEoU6RZyEm5lVSIjTmcdoB9HA=="],
 
     "@hono/zod-validator": ["@hono/zod-validator@0.8.0", "", { "peerDependencies": { "hono": ">=4.10.0", "zod": "^3.25.0 || ^4.0.0" } }, "sha512-5uS4S1/LKtZQYvD4BtpPUFkOv8d1wNxHHrChm26buMiEYc1FrHWvDUaKVBwkiVtvSExHSpLGDvcnpI2Copyj9w=="],
-
-    "@hynote/cli": ["@hynote/cli@workspace:packages/cli"],
-
-    "@hynote/database": ["@hynote/database@workspace:packages/database"],
-
-    "@hynote/server": ["@hynote/server@workspace:packages/server"],
-
-    "@hynote/shared": ["@hynote/shared@workspace:packages/shared"],
 
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.5", "", {}, "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og=="],
 

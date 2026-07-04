@@ -83,8 +83,8 @@ export function describeSchema(): string {
 
 ```ts
 import { describe, it, expect } from 'vitest';
-import { createTestDb } from '@hynote/database/test';
-import { replies } from '@hynote/database';
+import { createTestDb } from '@auto-email/database/test';
+import { replies } from '@auto-email/database';
 import { insertRow } from '../src/agent/tools/db';
 
 describe('insertRow', () => {
@@ -123,7 +123,7 @@ describe('insertRow', () => {
 import { tool } from 'ai';
 import { z } from 'zod';
 import { getTableColumns } from 'drizzle-orm';
-import { WRITABLE_TABLES, type Db } from '@hynote/database';
+import { WRITABLE_TABLES, type Db } from '@auto-email/database';
 import { queryStats } from '../../services/stats';
 
 export async function insertRow(
@@ -184,7 +184,7 @@ export function dbTools(db: Db) {
 
 **Files:** Modify `packages/server/src/services/ai.ts`
 
-- [ ] **Step 1: Import** — add `describeSchema` to the `@hynote/database`… no: import from shared? It's in `@hynote/database`. Add `import { describeSchema } from '@hynote/database';` near the other imports.
+- [ ] **Step 1: Import** — add `describeSchema` to the `@auto-email/database`… no: import from shared? It's in `@auto-email/database`. Add `import { describeSchema } from '@auto-email/database';` near the other imports.
 
 - [ ] **Step 2: Add a `systemFor` helper** (module scope in `ai.ts`):
 
@@ -195,7 +195,7 @@ function systemFor(skill: SkillManifest): string {
     : skill.body;
 }
 ```
-(`SkillManifest` is already imported for the AiPort types; if not, add it to the `@hynote/shared` type import.)
+(`SkillManifest` is already imported for the AiPort types; if not, add it to the `@auto-email/shared` type import.)
 
 - [ ] **Step 3: Use `systemFor(skill)`** everywhere the runtime currently passes `system: skill.body`:
   - in `runSkill`'s `generateText({ ... system: skill.body ... })` → `system: systemFor(skill)`;
@@ -237,7 +237,7 @@ When finished, reply in one short line stating how many rows you inserted.
 ## Task 5: Verify + record the 7 partner IDs (dogfood)
 
 - [ ] **Step 1: Final gate** — `bun run test` (prior 52 + 2 describe + 4 db-insert = 58) and `bunx tsc -p packages/{shared,database,server,cli}/tsconfig.json --noEmit` (all exit 0).
-- [ ] **Step 2 (user, needs real `.env` + TTY/server):** In `hynote` (or `curl` the running server) send:
+- [ ] **Step 2 (user, needs real `.env` + TTY/server):** In `auto-email` (or `curl` the running server) send:
   `记录这些 partner 到数据库：787598579, 261872805, 893014664, 6ece.0358, 258141459, 679652778, uisehsj72`
   → routes to `record` → 7 × `db_insert` into `replies` (template='partner', emailName=ID, metadata='{"status":"applied"}'), all IDs exactly as given.
 - [ ] **Step 3: Confirm** — 7 new `replies` rows with `template='partner'` (e.g. `GET /api/stats?dimension=template` shows partner=7, or query the DB). The reply agent's normal flow is unaffected.
@@ -248,4 +248,4 @@ When finished, reply in one short line stating how many rows you inserted.
 
 - **Spec coverage:** `describeSchema`+`WRITABLE_TABLES` (Task 1); insert-only `db_insert`/`insertRow` with table+column whitelist, auto id, required-NOT-NULL check, parameterized (Task 2); schema injected into system for db_insert skills (Task 3); `record` skill + seed (Task 4); dogfood the 7 IDs (Task 5). No update/delete tool anywhere.
 - **Placeholder scan:** none — full code per step; the `.values(row as typeof t.$inferInsert)` note is a concrete tsc-fallback (no `any`), not deferred work.
-- **Type consistency:** `insertRow(db: Db, table: string, values: Record<string,string|number|null>): {inserted, id}` matches the test calls + the `db_insert` `execute`. Column keys are TS property names (`emailName`, `template`, `createdAt`) consistently across `describeSchema`, the tool, the `record` SKILL.md, and the test. `WRITABLE_TABLES` / `describeSchema` imported from `@hynote/database`.
+- **Type consistency:** `insertRow(db: Db, table: string, values: Record<string,string|number|null>): {inserted, id}` matches the test calls + the `db_insert` `execute`. Column keys are TS property names (`emailName`, `template`, `createdAt`) consistently across `describeSchema`, the tool, the `record` SKILL.md, and the test. `WRITABLE_TABLES` / `describeSchema` imported from `@auto-email/database`.

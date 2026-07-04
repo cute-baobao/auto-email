@@ -1,7 +1,7 @@
 import { TextAttributes } from '@opentui/core';
 import { EmptyBorder } from '../components/border';
 import { useTheme } from '../providers/theme';
-import type { RunResponse } from '@hynote/shared';
+import type { RunResponse } from '@auto-email/shared';
 
 const REVIEW_ITEMS = [
   { label: '确认执行', hint: 'Enter' },

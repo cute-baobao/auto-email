@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { join } from 'node:path';
-import { createD1Client } from '@hynote/database';
+import { createD1Client } from '@auto-email/database';
 import { createApp } from './app';
 import { createAiService } from './services/ai';
 import { ensureConfigDir, loadConfig, defaultConfigDir } from './config';
@@ -33,6 +33,6 @@ const app = createApp({
 });
 
 export default {
-  port: Number(process.env.HYNOTE_PORT ?? 45678),
+  port: Number(process.env.AUTO_EMAIL_PORT ?? 45678),
   fetch: app.fetch,
 };

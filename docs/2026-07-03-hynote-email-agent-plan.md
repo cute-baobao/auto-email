@@ -108,7 +108,7 @@ CLOUDFLARE_DATABASE_ID=
 CLOUDFLARE_D1_TOKEN=
 DEEPSEEK_API_KEY=
 OPENAI_API_KEY=
-HYNOTE_PORT=3000
+AUTO_EMAIL_PORT=3000
 ```
 
 - [ ] **Step 6: Create `vitest.config.ts`**
@@ -146,7 +146,7 @@ git commit -m "chore: monorepo scaffold"
 
 ```json
 {
-  "name": "@hynote/shared",
+  "name": "@auto-email/shared",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -331,7 +331,7 @@ git add -A && git commit -m "feat(shared): types and zod schemas"
 
 ```json
 {
-  "name": "@hynote/database",
+  "name": "@auto-email/database",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -557,7 +557,7 @@ git add -A && git commit -m "feat(database): schema, D1 client, test db, migrati
 
 ```json
 {
-  "name": "@hynote/server",
+  "name": "@auto-email/server",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -566,8 +566,8 @@ git add -A && git commit -m "feat(database): schema, D1 client, test db, migrati
   "dependencies": {
     "@ai-sdk/openai-compatible": "^1.0.0",
     "@hono/zod-validator": "^0.8.0",
-    "@hynote/database": "workspace:*",
-    "@hynote/shared": "workspace:*",
+    "@auto-email/database": "workspace:*",
+    "@auto-email/shared": "workspace:*",
     "ai": "^6.0.197",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
@@ -803,7 +803,7 @@ Expected: PASS.
 
 ```ts
 import { describe, it, expect } from 'vitest';
-import { createTestDb, replies } from '@hynote/database';
+import { createTestDb, replies } from '@auto-email/database';
 import { queryStats } from '../src/services/stats';
 
 async function seed() {
@@ -843,8 +843,8 @@ Expected: FAIL — cannot find `./stats`.
 
 ```ts
 import { sql } from 'drizzle-orm';
-import type { Db } from '@hynote/database';
-import type { StatsPanel } from '@hynote/shared';
+import type { Db } from '@auto-email/database';
+import type { StatsPanel } from '@auto-email/shared';
 
 const DIMENSION_WHITELIST = [
   'template',
@@ -917,7 +917,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createTestDb, replies, type Db } from '@hynote/database';
+import { createTestDb, replies, type Db } from '@auto-email/database';
 import { buildToolRegistry, pickTools } from '../src/agent/tools/index';
 
 let dir: string;
@@ -988,7 +988,7 @@ export function templateTools(dir: string) {
 ```ts
 import { tool } from 'ai';
 import { z } from 'zod';
-import type { Db } from '@hynote/database';
+import type { Db } from '@auto-email/database';
 import { queryStats } from '../../services/stats';
 
 export function dbTools(db: Db) {
@@ -1007,7 +1007,7 @@ export function dbTools(db: Db) {
 
 ```ts
 import type { ToolSet } from 'ai';
-import type { Db } from '@hynote/database';
+import type { Db } from '@auto-email/database';
 import { templateTools } from './template';
 import { dbTools } from './db';
 
@@ -1100,7 +1100,7 @@ Expected: FAIL — cannot find `./skill`.
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { parse as parseYaml } from 'yaml';
-import type { SkillManifest, SkillOutput } from '@hynote/shared';
+import type { SkillManifest, SkillOutput } from '@auto-email/shared';
 
 export function parseSkill(raw: string): SkillManifest {
   const m = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
@@ -1166,7 +1166,7 @@ git add -A && git commit -m "feat(server): SKILL.md loader"
 
 ```ts
 import type { ToolSet } from 'ai';
-import type { SkillManifest, RunResponse } from '@hynote/shared';
+import type { SkillManifest, RunResponse } from '@auto-email/shared';
 
 export interface AiPort {
   routeSkill(input: string, skills: SkillManifest[]): Promise<string>;
@@ -1180,7 +1180,7 @@ export interface AiPort {
 import { generateText, generateObject, stepCountIs, type ToolSet } from 'ai';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { z } from 'zod';
-import type { AppConfig, SkillManifest, RunResponse } from '@hynote/shared';
+import type { AppConfig, SkillManifest, RunResponse } from '@auto-email/shared';
 import type { AiPort } from '../agent/ai-port';
 
 function resolveModel(config: AppConfig) {
@@ -1278,9 +1278,9 @@ git add -A && git commit -m "feat(server): AiPort + OpenAI-compatible ai service
 import { describe, it, expect, beforeAll } from 'vitest';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { createTestDb, replies, type Db } from '@hynote/database';
+import { createTestDb, replies, type Db } from '@auto-email/database';
 import type { AiPort } from '../src/agent/ai-port';
-import type { RunResponse, SkillManifest } from '@hynote/shared';
+import type { RunResponse, SkillManifest } from '@auto-email/shared';
 import { createApp } from '../src/app';
 
 const assets = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'assets');
@@ -1370,8 +1370,8 @@ Expected: FAIL — cannot find `./app`.
 ```ts
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
-import { RunRequestSchema, ReplyRecordSchema } from '@hynote/shared';
-import { replies, type Db } from '@hynote/database';
+import { RunRequestSchema, ReplyRecordSchema } from '@auto-email/shared';
+import { replies, type Db } from '@auto-email/database';
 import type { AiPort } from './agent/ai-port';
 import { loadSkills } from './agent/skill';
 import { buildToolRegistry, pickTools } from './agent/tools/index';
@@ -1494,7 +1494,7 @@ import { homedir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mkdir, cp, readFile, writeFile, access } from 'node:fs/promises';
-import { AppConfigSchema, type AppConfig } from '@hynote/shared';
+import { AppConfigSchema, type AppConfig } from '@auto-email/shared';
 
 const ASSETS = join(dirname(fileURLToPath(import.meta.url)), 'assets');
 
@@ -1551,7 +1551,7 @@ Expected: PASS.
 ```ts
 import 'dotenv/config';
 import { join } from 'node:path';
-import { createD1Client } from '@hynote/database';
+import { createD1Client } from '@auto-email/database';
 import { createApp } from './app';
 import { createAiService } from './services/ai';
 import { ensureConfigDir, loadConfig, defaultConfigDir } from './config';
@@ -1574,7 +1574,7 @@ const app = createApp({
 });
 
 export default {
-  port: Number(process.env.HYNOTE_PORT ?? 3000),
+  port: Number(process.env.AUTO_EMAIL_PORT ?? 3000),
   fetch: app.fetch,
 };
 ```
@@ -1600,13 +1600,13 @@ git add -A && git commit -m "feat(server): config bootstrap + server entry"
 
 ```json
 {
-  "name": "@hynote/cli",
+  "name": "@auto-email/cli",
   "version": "0.0.1",
   "private": true,
   "type": "module",
   "bin": { "hynote": "./src/index.tsx" },
   "dependencies": {
-    "@hynote/shared": "workspace:*",
+    "@auto-email/shared": "workspace:*",
     "@opentui/core": "^0.2.10",
     "@opentui/react": "^0.2.10",
     "clipboardy": "^4.0.0",
@@ -1712,9 +1712,9 @@ Expected: FAIL — cannot find `./client`.
 - [ ] **Step 3: Write `packages/cli/src/client.ts`**
 
 ```ts
-import type { RunResponse, ReplyRecord, SkillSummary, StatsPanel } from '@hynote/shared';
+import type { RunResponse, ReplyRecord, SkillSummary, StatsPanel } from '@auto-email/shared';
 
-const BASE = process.env.HYNOTE_SERVER ?? `http://localhost:${process.env.HYNOTE_PORT ?? 3000}`;
+const BASE = process.env.AUTO_EMAIL_SERVER ?? `http://localhost:${process.env.AUTO_EMAIL_PORT ?? 3000}`;
 
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) throw new Error(((await res.json().catch(() => ({}))) as { error?: string }).error ?? `HTTP ${res.status}`);
@@ -1775,7 +1775,7 @@ git add -A && git commit -m "feat(cli): slash parser + server client"
 - [ ] **Step 1: Write `packages/cli/src/renderers/stats.tsx`**
 
 ```tsx
-import type { StatsPanel } from '@hynote/shared';
+import type { StatsPanel } from '@auto-email/shared';
 
 function bar(count: number, max: number): string {
   const width = max > 0 ? Math.round((count / max) * 20) : 0;
@@ -1804,7 +1804,7 @@ export function StatsView({ panels }: { panels: StatsPanel[] }) {
 - [ ] **Step 2: Write `packages/cli/src/renderers/reply.tsx`**
 
 ```tsx
-import type { RunResponse } from '@hynote/shared';
+import type { RunResponse } from '@auto-email/shared';
 
 type ReplyOut = Extract<RunResponse, { type: 'reply' }>;
 
@@ -1832,7 +1832,7 @@ export function ReplyView({ data }: { data: ReplyOut }) {
 ```tsx
 import { useState } from 'react';
 import clipboard from 'clipboardy';
-import type { RunResponse } from '@hynote/shared';
+import type { RunResponse } from '@auto-email/shared';
 import { parseInput } from './slash';
 import { runSkill, saveReply, getStats } from './client';
 import { StatsView } from './renderers/stats';
@@ -1966,8 +1966,8 @@ bun run dev            # runs server + cli via mprocs
 ## Install globally
 
 ```bash
-cd packages/cli && bun link   # exposes the `hynote` bin on PATH
-# then run the server (bun run dev:server) and use `hynote`
+cd packages/cli && bun link   # exposes the `auto-email` bin on PATH
+# then run the server (bun run dev:server) and use `auto-email`
 ```
 
 ## Config
@@ -1985,7 +1985,7 @@ In the REPL: `/reply` + paste an email, `/stats [dimension]`, or type plain text
 - [ ] **Step 2: Link the CLI**
 
 Run: `cd packages/cli && bun link`
-Expected: `hynote` registered on PATH (bin at `~/.bun/bin/hynote`). `src/index.tsx` must start with the `#!/usr/bin/env bun` shebang (added in Task 8.3).
+Expected: `auto-email` registered on PATH (bin at `~/.bun/bin/hynote`). `src/index.tsx` must start with the `#!/usr/bin/env bun` shebang (added in Task 8.3).
 
 ### Task 9.2: Full test + typecheck gate
 

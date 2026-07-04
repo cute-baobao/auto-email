@@ -1,5 +1,5 @@
 import type { ToolSet } from 'ai';
-import type { Db } from '@hynote/database';
+import type { Db } from '@auto-email/database';
 import { systemTools } from './system';
 import { templateTools } from './template';
 import { dbTools } from './db';

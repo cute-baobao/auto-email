@@ -1,8 +1,8 @@
-import type { RunResponse, ReplyRecord, SkillSummary, StatsPanel, RunStreamEvent } from '@hynote/shared';
-import { RunStreamEventSchema } from '@hynote/shared';
+import type { RunResponse, ReplyRecord, SkillSummary, StatsPanel, RunStreamEvent } from '@auto-email/shared';
+import { RunStreamEventSchema } from '@auto-email/shared';
 import { EventSourceParserStream } from 'eventsource-parser/stream';
 
-const BASE = process.env.HYNOTE_SERVER ?? `http://localhost:${process.env.HYNOTE_PORT ?? 45678}`;
+const BASE = process.env.AUTO_EMAIL_SERVER ?? `http://localhost:${process.env.AUTO_EMAIL_PORT ?? 45678}`;
 
 export class ManualFallbackError extends Error {}
 

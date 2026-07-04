@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { RunResponse } from '@hynote/shared';
+import type { RunResponse } from '@auto-email/shared';
 import { shouldConfirm } from '../src/should-confirm';
 
 const reply = (template: string): RunResponse => ({
