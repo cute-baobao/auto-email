@@ -91,7 +91,7 @@ export function createApp(deps: AppDeps) {
         if (ac.signal.aborted) return;
         await stream.writeSSE({
           event: 'error',
-          data: JSON.stringify({ type: 'error', message: (e as Error).message, fallback: 'manual' }),
+          data: JSON.stringify({ type: 'error', message: e instanceof Error ? e.message : String(e), fallback: 'manual' }),
         });
       }
     });

@@ -3,7 +3,7 @@ import { TextAttributes } from '@opentui/core';
 export interface ProgressState {
   reasoning: string;
   text: string;
-  tools: { name: string; done: boolean }[];
+  tools: { id: string; name: string; done: boolean }[];
 }
 
 export function ProgressView({ state }: { state: ProgressState }) {
@@ -16,8 +16,8 @@ export function ProgressView({ state }: { state: ProgressState }) {
           <text fg="gray" attributes={TextAttributes.DIM}>{`Thinking: ${state.reasoning}`}</text>
         </box>
       ) : null}
-      {state.tools.map((t, i) => (
-        <text key={`${i}-${t.name}`} fg="cyan">{`▸ ${t.name}${t.done ? ' ✓' : ' …'}`}</text>
+      {state.tools.map((t) => (
+        <text key={t.id} fg="cyan">{`▸ ${t.name}${t.done ? ' ✓' : ' …'}`}</text>
       ))}
       {state.text ? <text fg="white">{state.text}</text> : null}
     </box>

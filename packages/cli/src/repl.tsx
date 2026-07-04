@@ -129,15 +129,12 @@ export function Repl() {
                 if (ev.type === 'reasoning-delta') return { ...p, reasoning: p.reasoning + ev.text };
                 if (ev.type === 'text-delta') return { ...p, text: p.text + ev.text };
                 if (ev.type === 'tool-call')
-                  return { ...p, tools: [...p.tools, { name: ev.toolName, done: false }] };
+                  return { ...p, tools: [...p.tools, { id: ev.toolCallId, name: ev.toolName, done: false }] };
                 if (ev.type === 'tool-result') {
-                  const tools = [...p.tools];
-                  for (let i = tools.length - 1; i >= 0; i--)
-                    if (!tools[i]!.done) {
-                      tools[i] = { ...tools[i]!, done: true };
-                      break;
-                    }
-                  return { ...p, tools };
+                  return {
+                    ...p,
+                    tools: p.tools.map((t) => (t.id === ev.toolCallId ? { ...t, done: true } : t)),
+                  };
                 }
                 return p;
               });
@@ -156,7 +153,7 @@ export function Repl() {
         } catch (err) {
           setStreaming(false);
           setProgress({ reasoning: '', text: '', tools: [] });
-          if ((err as Error).name === 'AbortError') {
+          if (ac.signal.aborted) {
             setStatus('已取消');
             return;
           }

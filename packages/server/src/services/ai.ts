@@ -1,7 +1,7 @@
 import { generateText, streamText, stepCountIs, type ModelMessage } from 'ai';
 import { createDeepSeek, type DeepSeekLanguageModelOptions } from '@ai-sdk/deepseek';
 import { z, type ZodType } from 'zod';
-import type { AppConfig, SkillManifest, RunResponse, RunStreamEvent } from '@hynote/shared';
+import type { AppConfig, SkillManifest, RunResponse } from '@hynote/shared';
 import type { AiPort } from '../agent/ai-port';
 
 const DEEPSEEK_PROVIDER_OPTIONS = {
@@ -67,12 +67,12 @@ function extractJsonObject(text: string): unknown {
 async function generateJson<T>(
   model: ReturnType<typeof resolveModel>,
   schema: ZodType<T>,
-  opts: { system?: string; prompt?: string; messages?: ModelMessage[] },
+  opts: { system?: string; prompt?: string; messages?: ModelMessage[]; signal?: AbortSignal },
 ): Promise<T> {
   const { text } = await generateText(
     opts.messages
-      ? { model, system: opts.system, messages: opts.messages, providerOptions: DEEPSEEK_PROVIDER_OPTIONS }
-      : { model, system: opts.system, prompt: opts.prompt ?? '', providerOptions: DEEPSEEK_PROVIDER_OPTIONS },
+      ? { model, system: opts.system, messages: opts.messages, abortSignal: opts.signal, providerOptions: DEEPSEEK_PROVIDER_OPTIONS }
+      : { model, system: opts.system, prompt: opts.prompt ?? '', abortSignal: opts.signal, providerOptions: DEEPSEEK_PROVIDER_OPTIONS },
   );
   return schema.parse(extractJsonObject(text));
 }
@@ -158,10 +158,14 @@ export function createAiService(config: AppConfig): AiPort {
           };
         } else if (part.type === 'tool-result') {
           yield { type: 'tool-result', toolCallId: part.toolCallId, result: part.output };
+        } else if (part.type === 'tool-error') {
+          yield { type: 'tool-result', toolCallId: part.toolCallId, result: { error: String(part.error) } };
         } else if (part.type === 'error') {
-          throw part.error;
+          throw part.error instanceof Error ? part.error : new Error(String(part.error));
         }
       }
+
+      if (signal.aborted) return;
 
       const messages = (await result.response).messages;
       const fullText = await result.text;
@@ -174,6 +178,7 @@ export function createAiService(config: AppConfig): AiPort {
         const parsed = await generateJson(model, replyOutputSchema, {
           system: skill.body,
           messages: [...messages, { role: 'user', content: REPLY_SHAPE + JSON_INSTRUCTION }],
+          signal,
         });
         const metadata: Record<string, string> = {};
         for (const [k, v] of Object.entries(parsed.metadata ?? {})) {
@@ -196,6 +201,7 @@ export function createAiService(config: AppConfig): AiPort {
       const parsed = await generateJson(model, statsOutputSchema, {
         system: skill.body,
         messages: [...messages, { role: 'user', content: STATS_SHAPE + JSON_INSTRUCTION }],
+        signal,
       });
       yield { type: 'result', result: { type: 'stats', skill: skill.name, panels: parsed.panels } };
     },
