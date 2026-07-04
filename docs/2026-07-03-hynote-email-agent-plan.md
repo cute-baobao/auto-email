@@ -12,6 +12,8 @@
 
 **Tooling note (tool names):** OpenAI-compatible function names must match `^[a-zA-Z0-9_-]+$`, so tool identifiers use underscores (`template_list`, `template_get`, `template_fill`, `db_query_stats`). SKILL.md `allowed_tools` uses these same underscore names.
 
+**Test layout convention:** Every package keeps its Vitest test files in a flat `tests/` folder at the package root (e.g. `packages/server/tests/template.test.ts`), NOT colocated next to sources. Test files import the code under test with a `../src/...` relative path. The root `vitest.config.ts` glob `packages/**/*.test.ts` already discovers them.
+
 **Run all commands from the repo root** `/Users/bao/data/code/hynote-email-agent` unless stated otherwise.
 
 ---
@@ -165,7 +167,7 @@ Expected: lockfile written, no errors.
 - Create: `packages/shared/src/types.ts`
 - Create: `packages/shared/src/schemas.ts`
 - Create: `packages/shared/src/index.ts`
-- Test: `packages/shared/src/schemas.test.ts`
+- Test: `packages/shared/tests/schemas.test.ts`
 
 - [ ] **Step 1: Write `packages/shared/src/types.ts`**
 
@@ -229,11 +231,11 @@ export interface AppConfig {
 }
 ```
 
-- [ ] **Step 2: Write the failing test `packages/shared/src/schemas.test.ts`**
+- [ ] **Step 2: Write the failing test `packages/shared/tests/schemas.test.ts`**
 
 ```ts
 import { describe, it, expect } from 'vitest';
-import { RunRequestSchema, ReplyRecordSchema } from './schemas';
+import { RunRequestSchema, ReplyRecordSchema } from '../src/schemas';
 
 describe('RunRequestSchema', () => {
   it('accepts input with optional skill', () => {
@@ -401,14 +403,14 @@ Expected: success.
 - Create: `packages/database/src/client.ts`
 - Create: `packages/database/src/test-db.ts`
 - Create: `packages/database/src/index.ts`
-- Test: `packages/database/src/test-db.test.ts`
+- Test: `packages/database/tests/test-db.test.ts`
 
-- [ ] **Step 1: Write the failing test `packages/database/src/test-db.test.ts`**
+- [ ] **Step 1: Write the failing test `packages/database/tests/test-db.test.ts`**
 
 ```ts
 import { describe, it, expect } from 'vitest';
-import { createTestDb } from './test-db';
-import { replies } from './schema';
+import { createTestDb } from '../src/test-db';
+import { replies } from '../src/schema';
 
 describe('createTestDb', () => {
   it('creates an in-memory db with the replies table', async () => {
@@ -706,7 +708,7 @@ git add -A && git commit -m "feat(server): skeleton + bundled templates and skil
 
 **Files:**
 - Create: `packages/server/src/services/template.ts`
-- Test: `packages/server/src/services/template.test.ts`
+- Test: `packages/server/tests/template.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
@@ -715,7 +717,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { mkdtemp, writeFile, mkdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { listTemplates, getTemplate, fillTemplate } from './template';
+import { listTemplates, getTemplate, fillTemplate } from '../src/services/template';
 
 let dir: string;
 beforeAll(async () => {
@@ -740,7 +742,7 @@ describe('template service', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `bun run test packages/server/src/services/template.test.ts`
+Run: `bun run test packages/server/tests/template.test.ts`
 Expected: FAIL — cannot find `./template`.
 
 - [ ] **Step 3: Write `packages/server/src/services/template.ts`**
@@ -778,21 +780,21 @@ export function fillTemplate(body: string, vars: Record<string, string>): string
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `bun run test packages/server/src/services/template.test.ts`
+Run: `bun run test packages/server/tests/template.test.ts`
 Expected: PASS.
 
 ### Task 3.3: stats service (TDD)
 
 **Files:**
 - Create: `packages/server/src/services/stats.ts`
-- Test: `packages/server/src/services/stats.test.ts`
+- Test: `packages/server/tests/stats.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
 import { describe, it, expect } from 'vitest';
 import { createTestDb, replies } from '@hynote/database';
-import { queryStats } from './stats';
+import { queryStats } from '../src/services/stats';
 
 async function seed() {
   const db = await createTestDb();
@@ -824,7 +826,7 @@ describe('queryStats', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `bun run test packages/server/src/services/stats.test.ts`
+Run: `bun run test packages/server/tests/stats.test.ts`
 Expected: FAIL — cannot find `./stats`.
 
 - [ ] **Step 3: Write `packages/server/src/services/stats.ts`**
@@ -877,7 +879,7 @@ export async function queryStats(db: Db, dimension?: string): Promise<StatsPanel
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `bun run test packages/server/src/services/stats.test.ts`
+Run: `bun run test packages/server/tests/stats.test.ts`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -896,7 +898,7 @@ git add -A && git commit -m "feat(server): template and stats services"
 - Create: `packages/server/src/agent/tools/template.ts`
 - Create: `packages/server/src/agent/tools/db.ts`
 - Create: `packages/server/src/agent/tools/index.ts`
-- Test: `packages/server/src/agent/tools/tools.test.ts`
+- Test: `packages/server/tests/tools.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
@@ -906,7 +908,7 @@ import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createTestDb, replies, type Db } from '@hynote/database';
-import { buildToolRegistry, pickTools } from './index';
+import { buildToolRegistry, pickTools } from '../src/agent/tools/index';
 
 let dir: string;
 let db: Db;
@@ -937,7 +939,7 @@ describe('tool registry', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `bun run test packages/server/src/agent/tools`
+Run: `bun run test packages/server/tests/tools.test.ts`
 Expected: FAIL — cannot find `./index`.
 
 - [ ] **Step 3: Write `packages/server/src/agent/tools/template.ts`**
@@ -1014,7 +1016,7 @@ export function pickTools(registry: ToolSet, allowed: string[]): ToolSet {
 
 - [ ] **Step 6: Run test to verify it passes**
 
-Run: `bun run test packages/server/src/agent/tools`
+Run: `bun run test packages/server/tests/tools.test.ts`
 Expected: PASS.
 
 - [ ] **Step 7: Commit**
@@ -1031,7 +1033,7 @@ git add -A && git commit -m "feat(server): agent tool registry"
 
 **Files:**
 - Create: `packages/server/src/agent/skill.ts`
-- Test: `packages/server/src/agent/skill.test.ts`
+- Test: `packages/server/tests/skill.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1040,7 +1042,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { parseSkill, loadSkills } from './skill';
+import { parseSkill, loadSkills } from '../src/agent/skill';
 
 describe('parseSkill', () => {
   it('parses frontmatter and body', () => {
@@ -1079,7 +1081,7 @@ describe('loadSkills', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `bun run test packages/server/src/agent/skill.test.ts`
+Run: `bun run test packages/server/tests/skill.test.ts`
 Expected: FAIL — cannot find `./skill`.
 
 - [ ] **Step 3: Write `packages/server/src/agent/skill.ts`**
@@ -1129,7 +1131,7 @@ export async function loadSkills(dir: string): Promise<SkillManifest[]> {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `bun run test packages/server/src/agent/skill.test.ts`
+Run: `bun run test packages/server/tests/skill.test.ts`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -1258,7 +1260,7 @@ git add -A && git commit -m "feat(server): AiPort + OpenAI-compatible ai service
 
 **Files:**
 - Create: `packages/server/src/app.ts`
-- Test: `packages/server/src/app.test.ts`
+- Test: `packages/server/tests/app.test.ts`
 
 - [ ] **Step 1: Write the failing test** (end-to-end via `app.request`, fake `AiPort`, real libsql db + real skill/template dirs from bundled assets)
 
@@ -1267,11 +1269,11 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { createTestDb, replies, type Db } from '@hynote/database';
-import type { AiPort } from './agent/ai-port';
+import type { AiPort } from '../src/agent/ai-port';
 import type { RunResponse, SkillManifest } from '@hynote/shared';
-import { createApp } from './app';
+import { createApp } from '../src/app';
 
-const assets = join(dirname(fileURLToPath(import.meta.url)), 'assets');
+const assets = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'assets');
 const templatesDir = join(assets, 'templates');
 const skillsDir = join(assets, 'skills');
 
@@ -1350,7 +1352,7 @@ describe('POST /api/reply then GET /api/stats', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `bun run test packages/server/src/app.test.ts`
+Run: `bun run test packages/server/tests/app.test.ts`
 Expected: FAIL — cannot find `./app`.
 
 - [ ] **Step 3: Write `packages/server/src/app.ts`**
@@ -1431,7 +1433,7 @@ export function createApp(deps: AppDeps) {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `bun run test packages/server/src/app.test.ts`
+Run: `bun run test packages/server/tests/app.test.ts`
 Expected: PASS (all four describe blocks).
 
 - [ ] **Step 5: Commit**
@@ -1445,7 +1447,7 @@ git add -A && git commit -m "feat(server): Hono app + routes with e2e tests"
 **Files:**
 - Create: `packages/server/src/config.ts`
 - Create: `packages/server/src/index.ts`
-- Test: `packages/server/src/config.test.ts`
+- Test: `packages/server/tests/config.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1454,7 +1456,7 @@ import { describe, it, expect } from 'vitest';
 import { mkdtemp, readFile, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { ensureConfigDir, loadConfig } from './config';
+import { ensureConfigDir, loadConfig } from '../src/config';
 
 describe('ensureConfigDir', () => {
   it('seeds templates, skills, and config.json into an empty dir', async () => {
@@ -1472,7 +1474,7 @@ describe('ensureConfigDir', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `bun run test packages/server/src/config.test.ts`
+Run: `bun run test packages/server/tests/config.test.ts`
 Expected: FAIL — cannot find `./config`.
 
 - [ ] **Step 3: Write `packages/server/src/config.ts`**
@@ -1531,7 +1533,7 @@ export async function loadConfig(base = defaultConfigDir()): Promise<AppConfig> 
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `bun run test packages/server/src/config.test.ts`
+Run: `bun run test packages/server/tests/config.test.ts`
 Expected: PASS.
 
 - [ ] **Step 5: Write `packages/server/src/index.ts`**
@@ -1582,7 +1584,7 @@ git add -A && git commit -m "feat(server): config bootstrap + server entry"
 **Files:**
 - Create: `packages/cli/package.json`, `packages/cli/tsconfig.json`
 - Create: `packages/cli/src/slash.ts`
-- Test: `packages/cli/src/slash.test.ts`
+- Test: `packages/cli/tests/slash.test.ts`
 
 - [ ] **Step 1: Create `packages/cli/package.json`**
 
@@ -1608,11 +1610,11 @@ git add -A && git commit -m "feat(server): config bootstrap + server entry"
 { "extends": "../../tsconfig.base.json", "include": ["src"] }
 ```
 
-- [ ] **Step 3: Write the failing test `packages/cli/src/slash.test.ts`**
+- [ ] **Step 3: Write the failing test `packages/cli/tests/slash.test.ts`**
 
 ```ts
 import { describe, it, expect } from 'vitest';
-import { parseInput } from './slash';
+import { parseInput } from '../src/slash';
 
 describe('parseInput', () => {
   it('parses a slash command with trailing text', () => {
@@ -1629,7 +1631,7 @@ describe('parseInput', () => {
 
 - [ ] **Step 4: Run test to verify it fails**
 
-Run: `bun run test packages/cli/src/slash.test.ts`
+Run: `bun run test packages/cli/tests/slash.test.ts`
 Expected: FAIL — cannot find `./slash`.
 
 - [ ] **Step 5: Write `packages/cli/src/slash.ts`**
@@ -1652,20 +1654,20 @@ export function parseInput(raw: string): ParsedInput {
 
 - [ ] **Step 6: Run test to verify it passes**
 
-Run: `bun run test packages/cli/src/slash.test.ts`
+Run: `bun run test packages/cli/tests/slash.test.ts`
 Expected: PASS.
 
 ### Task 8.2: server client (TDD with mocked fetch)
 
 **Files:**
 - Create: `packages/cli/src/client.ts`
-- Test: `packages/cli/src/client.test.ts`
+- Test: `packages/cli/tests/client.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { runSkill, saveReply, listSkills, getStats } from './client';
+import { runSkill, saveReply, listSkills, getStats } from '../src/client';
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -1693,7 +1695,7 @@ describe('client', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `bun run test packages/cli/src/client.test.ts`
+Run: `bun run test packages/cli/tests/client.test.ts`
 Expected: FAIL — cannot find `./client`.
 
 - [ ] **Step 3: Write `packages/cli/src/client.ts`**
@@ -1738,7 +1740,7 @@ export async function getStats(dimension?: string): Promise<{ panels: StatsPanel
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `bun run test packages/cli/src/client.test.ts`
+Run: `bun run test packages/cli/tests/client.test.ts`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
