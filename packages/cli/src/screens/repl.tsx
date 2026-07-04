@@ -24,6 +24,7 @@ import { Header } from '../components/header';
 import { TEXTAREA_KEY_BINDINGS } from '../components/input-bar';
 import { ConfirmMenu, CONFIRM_ITEMS } from '../components/confirm-menu';
 import { EmptyBorder } from '../components/border';
+import { UserMessage } from '../components/user-message';
 import { TemplatePicker } from '../components/dialogs/template-dialog';
 import { ThemeDialog } from '../components/dialogs/theme-dialog';
 import type { Command } from '../components/command-menu/types';
@@ -54,11 +55,6 @@ type Pending = { turnId: number; reply: ReplyResult; emailContent: string };
 
 const PROVIDER = 'deepseek';
 const MODEL = 'deepseek-chat';
-
-function truncate(text: string): string {
-  const t = text.trim();
-  return t.length > 80 ? `${t.slice(0, 80)}…` : t;
-}
 
 // Pill labels for a confirmed/pending reply: template + sender + skill metadata.
 function metaForReply(reply: ReplyResult): Record<string, string> {
@@ -258,11 +254,11 @@ export function Repl() {
         const id = ++idRef.current;
         try {
           const { panels } = await getStats();
-          addTurn({ id, input: truncate(raw), events: [], streaming: false, stats: panels });
+          addTurn({ id, input: raw, events: [], streaming: false, stats: panels });
         } catch (err) {
           addTurn({
             id,
-            input: truncate(raw),
+            input: raw,
             events: [],
             streaming: false,
             error: (err as Error).message,
@@ -272,7 +268,7 @@ export function Repl() {
       }
 
       const id = ++idRef.current;
-      addTurn({ id, input: truncate(raw), events: [], streaming: true });
+      addTurn({ id, input: raw, events: [], streaming: true });
       const ac = new AbortController();
       abortRef.current = ac;
       setStreaming(true);
@@ -434,11 +430,7 @@ export function Repl() {
         const showBot = parts.length > 0 || turn.streaming;
         return (
           <box key={turn.id} flexDirection="column" width="100%">
-            {turn.input && (
-              <box paddingX={3}>
-                <text attributes={TextAttributes.DIM}>{`> ${turn.input}`}</text>
-              </box>
-            )}
+            {turn.input && <UserMessage message={turn.input} />}
             {showBot && (
               <BotMessage
                 parts={parts}
