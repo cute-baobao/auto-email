@@ -11,7 +11,7 @@ describe('ensureConfigDir', () => {
     const templates = await readdir(join(home, 'templates'));
     expect(templates).toContain('kol-media-support.md');
     const skills = await readdir(join(home, 'skills'));
-    expect(skills.sort()).toEqual(['reply', 'stats']);
+    expect(skills.sort()).toEqual(['record', 'reply', 'stats']);
     const cfg = await loadConfig(home);
     expect(cfg.providers.default).toBeTruthy();
   });

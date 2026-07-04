@@ -47,7 +47,7 @@ describe('GET /api/skills', () => {
     const res = await app.request('/api/skills');
     expect(res.status).toBe(200);
     const body = (await res.json()) as { name: string }[];
-    expect(body.map((s) => s.name).sort()).toEqual(['reply', 'stats']);
+    expect(body.map((s) => s.name).sort()).toEqual(['record', 'reply', 'stats']);
   });
 });
 
