@@ -4,6 +4,10 @@ import { createRoot } from '@opentui/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { RootLayout } from './layouts/root-layout';
 import { Repl } from './screens/repl';
+import { ensureServer, registerCleanup } from './server-boot';
+
+const { proc } = await ensureServer();
+if (proc) registerCleanup(proc);
 
 const router = createMemoryRouter([
   { path: '/', element: <RootLayout />, children: [{ index: true, element: <Repl /> }] },
