@@ -20,7 +20,7 @@ bun run dev            # runs server + cli via mprocs
 ## Install globally
 
 ```bash
-bun link               # from repo root, exposes `hynote`
+cd packages/cli && bun link   # exposes the `hynote` bin on PATH
 # then run the server (bun run dev:server) and use `hynote`
 ```
 

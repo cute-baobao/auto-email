@@ -1961,7 +1961,7 @@ bun run dev            # runs server + cli via mprocs
 ## Install globally
 
 ```bash
-bun link               # from repo root, exposes `hynote`
+cd packages/cli && bun link   # exposes the `hynote` bin on PATH
 # then run the server (bun run dev:server) and use `hynote`
 ```
 
@@ -1979,8 +1979,8 @@ In the REPL: `/reply` + paste an email, `/stats [dimension]`, or type plain text
 
 - [ ] **Step 2: Link the CLI**
 
-Run: `bun link`
-Expected: `hynote` registered. (Making `src/index.tsx` executable via Bun shebang may be needed; add `#!/usr/bin/env bun` as line 1 of `packages/cli/src/index.tsx` if `bun link` requires it.)
+Run: `cd packages/cli && bun link`
+Expected: `hynote` registered on PATH (bin at `~/.bun/bin/hynote`). `src/index.tsx` must start with the `#!/usr/bin/env bun` shebang (added in Task 8.3).
 
 ### Task 9.2: Full test + typecheck gate
 
