@@ -7,6 +7,7 @@ type Props = {
   children?: React.ReactNode;
   onSubmit: (text: string) => void;
   inputDisabled?: boolean;
+  inputSlot?: React.ReactNode;
   loading?: boolean;
   interruptible?: boolean;
   commands: Command[];
@@ -16,6 +17,7 @@ export function SessionShell({
   children,
   onSubmit,
   inputDisabled,
+  inputSlot,
   loading,
   interruptible = false,
   commands,
@@ -34,7 +36,9 @@ export function SessionShell({
         <box gap={1}>{children}</box>
       </scrollbox>
       <box flexShrink={0}>
-        <InputBar onSubmit={onSubmit} disabled={inputDisabled} commands={commands} />
+        {inputSlot ?? (
+          <InputBar onSubmit={onSubmit} disabled={inputDisabled} commands={commands} />
+        )}
       </box>
       <box
         flexShrink={0}
