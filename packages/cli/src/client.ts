@@ -75,6 +75,17 @@ export async function getStats(dimension?: string): Promise<{ panels: StatsPanel
   return json<{ panels: StatsPanel[] }>(await fetch(`${BASE}/api/stats${q}`));
 }
 
+export async function executeAction(action: string, payload: Record<string, unknown>): Promise<any> {
+  const res = await fetch(`${BASE}/api/execute`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ action, ...payload }),
+    signal: AbortSignal.timeout(10_000),
+  });
+  const data = (await res.json()) as { error?: string };
+  if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
+  return data;
+}
+
 export async function listTemplates(): Promise<{ name: string; body: string }[]> {
   const { templates } = await json<{ templates: { name: string; body: string }[] }>(
     await fetch(`${BASE}/api/templates`),

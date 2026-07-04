@@ -6,6 +6,7 @@ import type { RunResponse, RunStreamEvent, StatsPanel } from '@hynote/shared';
 import { parseInput } from '../slash';
 import { shouldConfirm } from '../should-confirm';
 import {
+  executeAction,
   getStats,
   listSkills,
   listTemplates,
@@ -19,6 +20,7 @@ import {
   type HynoteMessagePart,
 } from '../components/bot-message';
 import { ReplyMeta } from '../renderers/reply';
+import { ReviewCard } from '../renderers/review';
 import { StatsView } from '../renderers/stats';
 import { SessionShell } from '../components/session-shell';
 import { Header } from '../components/header';
@@ -53,6 +55,9 @@ type Turn = {
 // Which reply is currently awaiting Ctrl+Y/E/N. `emailContent` is the original
 // input, saved alongside the reply on confirm.
 type Pending = { turnId: number; reply: ReplyResult; emailContent: string };
+
+// A db-insert or db-query result awaiting user approval before execution.
+type DbPending = { res: RunResponse & { type: 'db-insert' | 'db-query' } };
 
 const PROVIDER = 'deepseek';
 const MODEL = 'deepseek-v4-flash';
@@ -126,6 +131,7 @@ export function Repl() {
   const [streaming, setStreaming] = useState(false);
   const [mode, setMode] = useState<Mode>('normal');
   const [pending, setPending] = useState<Pending | null>(null);
+  const [pendingDb, setPendingDb] = useState<DbPending | null>(null);
   const [commands, setCommands] = useState<Command[]>([]);
   const [editText, setEditText] = useState('');
 
@@ -139,6 +145,7 @@ export function Repl() {
   const streamingRef = useRef(false);
   const modeRef = useRef<Mode>('normal');
   const pendingRef = useRef<Pending | null>(null);
+  const pendingDbRef = useRef<DbPending | null>(null);
   // Edit buffer carriers: template/metadata/sender are preserved across an edit;
   // only the reply body is replaced. `editTurnId` is null for a manual-template
   // pick (a fresh turn is created on submit).
@@ -149,6 +156,7 @@ export function Repl() {
   streamingRef.current = streaming;
   modeRef.current = mode;
   pendingRef.current = pending;
+  pendingDbRef.current = pendingDb;
 
   const addTurn = useCallback((turn: Turn) => {
     setTurns((prev) => [...prev, turn]);
@@ -295,6 +303,10 @@ export function Repl() {
           }
         } else if (res.type === 'stats') {
           updateTurn(id, (t) => ({ ...t, streaming: false, stats: res.panels }));
+        } else if (res.type === 'db-insert' || res.type === 'db-query') {
+          updateTurn(id, (t) => ({ ...t, streaming: false }));
+          setPendingDb({ res });
+          setConfirmIndex(0);
         } else {
           updateTurn(id, (t) => ({ ...t, streaming: false }));
         }
@@ -380,6 +392,46 @@ export function Repl() {
       return;
     }
 
+    // DB action review: 确认执行 / 取消.
+    const d = pendingDbRef.current;
+    if (d) {
+      if (key.name === 'up') {
+        key.preventDefault();
+        setConfirmIndex((i) => Math.max(0, i - 1));
+        return;
+      }
+      if (key.name === 'down') {
+        key.preventDefault();
+        setConfirmIndex((i) => Math.min(1, i + 1));
+        return;
+      }
+      if (key.name === 'return' || key.name === 'enter') {
+        key.preventDefault();
+        if (confirmIndexRef.current === 0) {
+          const p = d;
+          setPendingDb(null);
+          const payload: Record<string, unknown> = p.res.type === 'db-insert'
+            ? { table: p.res.table, values: p.res.values }
+            : { table: p.res.table, query: p.res.query };
+          executeAction(p.res.type, payload).then(
+            (result) => toast.show({ message: '执行成功', variant: 'success' }),
+            (err) => toast.show({ message: `执行失败：${(err as Error).message}`, variant: 'error' }),
+          );
+        } else {
+          setPendingDb(null);
+          toast.show({ message: '已取消', variant: 'info' });
+        }
+        return;
+      }
+      if (key.name === 'escape') {
+        key.preventDefault();
+        setPendingDb(null);
+        toast.show({ message: '已取消', variant: 'info' });
+        return;
+      }
+      return;
+    }
+
     // Reply confirm / edit / cancel require a pending reply.
     const p = pendingRef.current;
     if (!p) return;
@@ -417,6 +469,8 @@ export function Repl() {
   const inputSlot =
     mode === 'edit' ? (
       <EditBar initialText={editText} onSubmitEdit={handleEditSubmit} />
+    ) : pendingDb ? (
+      <ReviewCard res={pendingDb.res} selectedIndex={confirmIndex} />
     ) : pending ? (
       <ConfirmMenu selectedIndex={confirmIndex} />
     ) : undefined;
