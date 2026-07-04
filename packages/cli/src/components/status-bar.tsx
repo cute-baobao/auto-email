@@ -10,7 +10,7 @@ export function StatusBar() {
       <text attributes={TextAttributes.DIM} fg={colors.dimSeparator}>
         ›
       </text>
-      <text>deepseek-chat</text>
+      <text>deepseek-v4-flash</text>
     </box>
   );
 }

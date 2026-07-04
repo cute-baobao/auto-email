@@ -54,7 +54,7 @@ type Turn = {
 type Pending = { turnId: number; reply: ReplyResult; emailContent: string };
 
 const PROVIDER = 'deepseek';
-const MODEL = 'deepseek-chat';
+const MODEL = 'deepseek-v4-flash';
 
 // Pill labels for a confirmed/pending reply: template + sender + skill metadata.
 function metaForReply(reply: ReplyResult): Record<string, string> {

@@ -9,7 +9,7 @@ const ASSETS = join(dirname(fileURLToPath(import.meta.url)), 'assets');
 const DEFAULT_CONFIG = {
   providers: {
     default: 'deepseek',
-    deepseek: { base_url: 'https://api.deepseek.com/v1', model: 'deepseek-chat' },
+    deepseek: { base_url: 'https://api.deepseek.com/v1', model: 'deepseek-v4-flash' },
   },
 };
 
