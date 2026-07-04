@@ -48,6 +48,7 @@
     "@types/react": "^19.2.15",
     "bun-types": "^1.3.14",
     "mprocs": "^0.9.3",
+    "typescript": "^5",
     "vitest": "^3.2.4"
   }
 }
@@ -1711,7 +1712,7 @@ import type { RunResponse, ReplyRecord, SkillSummary, StatsPanel } from '@hynote
 const BASE = process.env.HYNOTE_SERVER ?? `http://localhost:${process.env.HYNOTE_PORT ?? 3000}`;
 
 async function json<T>(res: Response): Promise<T> {
-  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? `HTTP ${res.status}`);
+  if (!res.ok) throw new Error(((await res.json().catch(() => ({}))) as { error?: string }).error ?? `HTTP ${res.status}`);
   return res.json() as Promise<T>;
 }
 
@@ -1763,6 +1764,8 @@ git add -A && git commit -m "feat(cli): slash parser + server client"
 - Create: `packages/cli/src/index.tsx`
 
 > The @opentui/react terminal UI is verified manually (per the testing decision, only the API/interfaces are e2e-tested). Keep components thin; all logic lives in the tested `slash.ts` / `client.ts`.
+
+> **Implementation note (authoritative):** the JSX code blocks below are illustrative. The shipped implementation targets the real `@opentui/react` v0.2.x API (as used by baocode): boot with `createCliRenderer` (`@opentui/core`) + `createRoot(renderer).render(<Repl/>)`; text entry is a `<textarea>` (ref = `TextareaRenderable`, `onSubmit` via ref, `plainText`/`setText`, `keyBindings`) — there is no `<input>`; elements are `<box>`/`<text>/`<scrollbox>` with `fg`/`attributes`/`flexDirection` etc.; reply confirm/cancel is via `useKeyboard` (Ctrl+Y confirm+copy+save, Ctrl+N cancel). The committed files under `packages/cli/src/` are the source of truth.
 
 - [ ] **Step 1: Write `packages/cli/src/renderers/stats.tsx`**
 
