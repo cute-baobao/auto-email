@@ -156,15 +156,16 @@ describe('POST /api/run/stream', () => {
 });
 
 describe('GET /api/templates', () => {
-  it('returns the 4 bundled templates with names and bodies', async () => {
+  it('returns the 5 bundled templates with names and bodies', async () => {
     const app = createApp({ db, templatesDir, skillsDir, ai: fakeAi() });
     const res = await app.request('/api/templates');
     expect(res.status).toBe(200);
     const body = (await res.json()) as { templates: { name: string; body: string }[] };
-    expect(body.templates).toHaveLength(4);
+    expect(body.templates).toHaveLength(5);
     expect(body.templates.map((t) => t.name).sort()).toEqual([
       'affiliate-enablement',
       'kol-media-support',
+      'plan-activated',
       'technical-support',
       'user-id-trial',
     ]);
