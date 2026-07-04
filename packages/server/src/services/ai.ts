@@ -1,7 +1,7 @@
-import { generateText, stepCountIs, type ModelMessage } from 'ai';
+import { generateText, streamText, stepCountIs, type ModelMessage } from 'ai';
 import { createDeepSeek, type DeepSeekLanguageModelOptions } from '@ai-sdk/deepseek';
 import { z, type ZodType } from 'zod';
-import type { AppConfig, SkillManifest, RunResponse } from '@hynote/shared';
+import type { AppConfig, SkillManifest, RunResponse, RunStreamEvent } from '@hynote/shared';
 import type { AiPort } from '../agent/ai-port';
 
 const DEEPSEEK_PROVIDER_OPTIONS = {
@@ -132,6 +132,72 @@ export function createAiService(config: AppConfig): AiPort {
         messages: finalMessages(STATS_SHAPE),
       });
       return { type: 'stats', skill: skill.name, panels: parsed.panels };
+    },
+    async *streamSkill(skill, input, tools, signal) {
+      const result = streamText({
+        model,
+        system: skill.body,
+        prompt: input,
+        tools,
+        stopWhen: stepCountIs(6),
+        abortSignal: signal,
+        providerOptions: DEEPSEEK_PROVIDER_OPTIONS,
+      });
+
+      for await (const part of result.fullStream) {
+        if (part.type === 'reasoning-delta') {
+          yield { type: 'reasoning-delta', text: part.text };
+        } else if (part.type === 'text-delta') {
+          yield { type: 'text-delta', text: part.text };
+        } else if (part.type === 'tool-call') {
+          yield {
+            type: 'tool-call',
+            toolCallId: part.toolCallId,
+            toolName: part.toolName,
+            args: part.input,
+          };
+        } else if (part.type === 'tool-result') {
+          yield { type: 'tool-result', toolCallId: part.toolCallId, result: part.output };
+        } else if (part.type === 'error') {
+          throw part.error;
+        }
+      }
+
+      const messages = (await result.response).messages;
+      const fullText = await result.text;
+
+      if (skill.output === 'text') {
+        yield { type: 'result', result: { type: 'text', skill: skill.name, text: fullText } };
+        return;
+      }
+      if (skill.output === 'reply') {
+        const parsed = await generateJson(model, replyOutputSchema, {
+          system: skill.body,
+          messages: [...messages, { role: 'user', content: REPLY_SHAPE + JSON_INSTRUCTION }],
+        });
+        const metadata: Record<string, string> = {};
+        for (const [k, v] of Object.entries(parsed.metadata ?? {})) {
+          if (v !== null && v !== undefined) metadata[k] = String(v);
+        }
+        yield {
+          type: 'result',
+          result: {
+            type: 'reply',
+            skill: skill.name,
+            template: parsed.template,
+            reply: parsed.reply,
+            metadata,
+            email_name: parsed.email_name ?? undefined,
+            email_from: parsed.email_from ?? undefined,
+          },
+        };
+        return;
+      }
+      const parsed = await generateJson(model, statsOutputSchema, {
+        system: skill.body,
+        messages: [...messages, { role: 'user', content: STATS_SHAPE + JSON_INSTRUCTION }],
+      });
+      yield { type: 'result', result: { type: 'stats', skill: skill.name, panels: parsed.panels } };
     },
   };
 }
