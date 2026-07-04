@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url)); // packages/cli/src
 const SERVER_ENTRY = resolve(HERE, '../../server/src/index.ts');
 const REPO_ROOT = resolve(HERE, '../../..');
-const PORT = Number(process.env.HYNOTE_PORT ?? 3000);
+const PORT = Number(process.env.HYNOTE_PORT ?? 45678);
 const CONFIG_DIR = join(homedir(), '.bao-auto-mail');
 const LOG_PATH = join(CONFIG_DIR, 'server.log');
 

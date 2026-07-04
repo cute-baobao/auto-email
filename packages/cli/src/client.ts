@@ -2,7 +2,7 @@ import type { RunResponse, ReplyRecord, SkillSummary, StatsPanel, RunStreamEvent
 import { RunStreamEventSchema } from '@hynote/shared';
 import { EventSourceParserStream } from 'eventsource-parser/stream';
 
-const BASE = process.env.HYNOTE_SERVER ?? `http://localhost:${process.env.HYNOTE_PORT ?? 3000}`;
+const BASE = process.env.HYNOTE_SERVER ?? `http://localhost:${process.env.HYNOTE_PORT ?? 45678}`;
 
 export class ManualFallbackError extends Error {}
 

@@ -33,6 +33,6 @@ const app = createApp({
 });
 
 export default {
-  port: Number(process.env.HYNOTE_PORT ?? 3000),
+  port: Number(process.env.HYNOTE_PORT ?? 45678),
   fetch: app.fetch,
 };

@@ -42,7 +42,7 @@ import { fileURLToPath } from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url)); // packages/cli/src
 const SERVER_ENTRY = resolve(HERE, '../../server/src/index.ts');
 const REPO_ROOT = resolve(HERE, '../../..');
-const PORT = Number(process.env.HYNOTE_PORT ?? 3000);
+const PORT = Number(process.env.HYNOTE_PORT ?? 45678);
 const CONFIG_DIR = join(homedir(), '.bao-auto-mail');
 const LOG_PATH = join(CONFIG_DIR, 'server.log');
 
@@ -110,7 +110,7 @@ createRoot(renderer).render(<RouterProvider router={router} />);
 - 单测 `packages/cli/tests/server-boot.test.ts`：mock `fetch` → `probeServer` 在 2xx 时返回 true、abort/非 ok 时 false。
 - `/api/health` 端到端测试（`packages/server/tests/app.test.ts`）：`GET /api/health` → 200 且 body `{ ok: true }`。
 - spawn/就绪/清理/复用：真实终端验证——
-  - 直接 `hynote`：应自动起 server（首次约数秒）再进 TUI；`~/.bao-auto-mail/server.log` 有 server 输出；Ctrl+C 退出后该 server 进程被 kill（`lsof -i:3000` 无残留）。
+  - 直接 `hynote`：应自动起 server（首次约数秒）再进 TUI；`~/.bao-auto-mail/server.log` 有 server 输出；Ctrl+C 退出后该 server 进程被 kill（`lsof -i:45678` 无残留）。
   - 先 `bun run dev:server` 再 `hynote`：应复用、不 spawn、退出不杀 dev server。
 
 ## 6. 改动文件

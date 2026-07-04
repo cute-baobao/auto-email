@@ -100,7 +100,7 @@ import { fileURLToPath } from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url)); // packages/cli/src
 const SERVER_ENTRY = resolve(HERE, '../../server/src/index.ts');
 const REPO_ROOT = resolve(HERE, '../../..');
-const PORT = Number(process.env.HYNOTE_PORT ?? 3000);
+const PORT = Number(process.env.HYNOTE_PORT ?? 45678);
 const CONFIG_DIR = join(homedir(), '.bao-auto-mail');
 const LOG_PATH = join(CONFIG_DIR, 'server.log');
 
@@ -211,7 +211,7 @@ git add packages/cli/src/index.tsx && git commit -m "feat(cli): auto-start backe
 
 - [ ] **Step 1: Final gate** — `bun run test` (existing 40 + `/api/health` + 3 probe = 44) and `bunx tsc -p packages/{shared,database,server,cli}/tsconfig.json --noEmit` (all exit 0) and `bun build packages/cli/src/index.tsx --target bun --outdir /tmp/ae-boot` (success).
 - [ ] **Step 2 (user, needs real `.env` + TTY):** Live checks:
-  - `hynote` alone → server auto-starts (first launch a few seconds), then TUI; `~/.bao-auto-mail/server.log` has server output; after quitting, `lsof -ti:3000` is empty (spawned server killed).
+  - `hynote` alone → server auto-starts (first launch a few seconds), then TUI; `~/.bao-auto-mail/server.log` has server output; after quitting, `lsof -ti:45678` is empty (spawned server killed).
   - `bun run dev:server` first, then `hynote` → reuses it (no second process), and quitting `hynote` leaves the dev server running.
   - Verify path resolution works for the globally-linked `hynote` (bin symlink) — if `../../server` doesn't resolve (symlink not followed), switch to walking up from `HERE` to the workspace root that contains `packages/server`. (Spec §7 risk.)
 
