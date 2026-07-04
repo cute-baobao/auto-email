@@ -22,6 +22,7 @@ import { StatsView } from '../renderers/stats';
 import { SessionShell } from '../components/session-shell';
 import { Header } from '../components/header';
 import { TEXTAREA_KEY_BINDINGS } from '../components/input-bar';
+import { ConfirmMenu, CONFIRM_ITEMS } from '../components/confirm-menu';
 import { EmptyBorder } from '../components/border';
 import { TemplatePicker } from '../components/dialogs/template-dialog';
 import { ThemeDialog } from '../components/dialogs/theme-dialog';
@@ -111,6 +112,7 @@ function EditBar({
           focused
           placeholder="编辑回复…"
           keyBindings={TEXTAREA_KEY_BINDINGS}
+          maxHeight={8}
         />
       </box>
     </box>
@@ -129,6 +131,10 @@ export function Repl() {
   const [pending, setPending] = useState<Pending | null>(null);
   const [commands, setCommands] = useState<Command[]>([]);
   const [editText, setEditText] = useState('');
+
+  const [confirmIndex, setConfirmIndex] = useState(0);
+  const confirmIndexRef = useRef(0);
+  confirmIndexRef.current = confirmIndex;
 
   const idRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
@@ -210,6 +216,7 @@ export function Repl() {
       if (turnId != null) {
         updateTurn(turnId, (t) => ({ ...t, reply: next, error: undefined }));
         setPending({ turnId, reply: next, emailContent: email });
+        setConfirmIndex(0);
       } else {
         const id = ++idRef.current;
         addTurn({
@@ -220,6 +227,7 @@ export function Repl() {
           reply: next,
         });
         setPending({ turnId: id, reply: next, emailContent: email });
+        setConfirmIndex(0);
       }
     },
     [addTurn, updateTurn],
@@ -282,6 +290,7 @@ export function Repl() {
         if (res.type === 'reply') {
           updateTurn(id, (t) => ({ ...t, streaming: false, reply: res }));
           setPending({ turnId: id, reply: res, emailContent: text || raw });
+          setConfirmIndex(0);
         } else if (res.type === 'stats') {
           updateTurn(id, (t) => ({ ...t, streaming: false, stats: res.panels }));
         } else {
@@ -330,6 +339,14 @@ export function Repl() {
     [runTurn],
   );
 
+  const startEdit = useCallback((p: Pending) => {
+    editBaseRef.current = p.reply;
+    editTurnIdRef.current = p.turnId;
+    editEmailRef.current = p.emailContent;
+    setEditText(p.reply.reply);
+    setMode('edit');
+  }, []);
+
   useKeyboard((key) => {
     // Esc aborts an in-flight stream — only at the Base layer, so an open dialog
     // keeps Esc for itself.
@@ -364,13 +381,28 @@ export function Repl() {
     // Reply confirm / edit / cancel require a pending reply.
     const p = pendingRef.current;
     if (!p) return;
+
+    if (key.name === 'up') {
+      key.preventDefault();
+      setConfirmIndex((i) => Math.max(0, i - 1));
+      return;
+    }
+    if (key.name === 'down') {
+      key.preventDefault();
+      setConfirmIndex((i) => Math.min(CONFIRM_ITEMS.length - 1, i + 1));
+      return;
+    }
+    if (key.name === 'return' || key.name === 'enter') {
+      key.preventDefault();
+      const idx = confirmIndexRef.current;
+      if (idx === 0) void confirmReply();
+      else if (idx === 1) startEdit(p);
+      else setPending(null);
+      return;
+    }
     if (key.ctrl && key.name === 'e') {
       key.preventDefault();
-      editBaseRef.current = p.reply;
-      editTurnIdRef.current = p.turnId;
-      editEmailRef.current = p.emailContent;
-      setEditText(p.reply.reply);
-      setMode('edit');
+      startEdit(p);
     } else if (key.ctrl && key.name === 'y') {
       key.preventDefault();
       void confirmReply();
@@ -380,12 +412,19 @@ export function Repl() {
     }
   });
 
+  const inputSlot =
+    mode === 'edit' ? (
+      <EditBar initialText={editText} onSubmitEdit={handleEditSubmit} />
+    ) : pending ? (
+      <ConfirmMenu selectedIndex={confirmIndex} />
+    ) : undefined;
+
   return (
     <SessionShell
       onSubmit={submit}
       loading={streaming}
       interruptible
-      inputDisabled={mode === 'edit'}
+      inputSlot={inputSlot}
       commands={commands}
     >
       <Header />
@@ -420,7 +459,6 @@ export function Repl() {
           </box>
         );
       })}
-      {mode === 'edit' && <EditBar initialText={editText} onSubmitEdit={handleEditSubmit} />}
     </SessionShell>
   );
 }
