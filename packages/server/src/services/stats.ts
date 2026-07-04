@@ -10,6 +10,7 @@ const DIMENSION_WHITELIST = [
   'promotion_quarter',
   'platform',
   'user_id_status',
+  'status',
 ];
 
 async function groupBy(db: Db, dimension: string): Promise<StatsPanel> {

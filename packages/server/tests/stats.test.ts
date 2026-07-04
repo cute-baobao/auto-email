@@ -28,4 +28,18 @@ describe('queryStats', () => {
   it('rejects a non-whitelisted dimension', async () => {
     await expect(queryStats(await seed(), 'evil; DROP TABLE')).rejects.toThrow();
   });
+  it('groups by status', async () => {
+    const db = await createTestDb();
+    await db.insert(replies).values([
+      { id: 'a', template: 'partner', replyContent: '.', metadata: '{"status":"applied"}' },
+      { id: 'b', template: 'partner', replyContent: '.', metadata: '{"status":"applied"}' },
+      { id: 'c', template: 'partner', replyContent: '.', metadata: '{"status":"notified"}' },
+    ]);
+    const panels = await queryStats(db, 'status');
+    expect(panels[0]!.title).toBe('status');
+    const applied = panels[0]!.rows.find((r) => r.label === 'applied');
+    const notified = panels[0]!.rows.find((r) => r.label === 'notified');
+    expect(applied!.count).toBe(2);
+    expect(notified!.count).toBe(1);
+  });
 });
