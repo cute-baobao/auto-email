@@ -42,7 +42,7 @@ export function ReplyView({ template, reply, metadata, emailName, emailFrom }: R
       )}
 
       <text fg="yellow" attributes={TextAttributes.DIM}>
-        Ctrl+Y 确认（复制并保存）· Ctrl+N 取消
+        Ctrl+E 编辑 · Ctrl+Y 确认并复制 · Ctrl+N 取消
       </text>
     </box>
   );
