@@ -26,7 +26,7 @@ export const AppConfigSchema = z.object({
     .catchall(ProviderConfigSchema),
 });
 
-const RunResponseSchema = z.union([
+export const RunResponseSchema = z.union([
   z.object({
     type: z.literal('reply'),
     skill: z.string(),
@@ -47,6 +47,24 @@ const RunResponseSchema = z.union([
     ),
   }),
   z.object({ type: z.literal('text'), skill: z.string(), text: z.string() }),
+  z.object({
+    type: z.literal('db-insert'),
+    table: z.string(),
+    values: z.record(z.string(), z.unknown()),
+  }),
+  z.object({
+    type: z.literal('db-query'),
+    table: z.string(),
+    query: z.object({
+      columns: z.array(z.string()).optional(),
+      where: z.array(z.object({
+        column: z.string(), op: z.string(), value: z.unknown(),
+      })).optional(),
+      orderBy: z.string().optional(),
+      limit: z.number().int().min(1).max(100).optional(),
+    }),
+    result: z.array(z.record(z.string(), z.unknown())).optional(),
+  }),
 ]);
 
 export const RunStreamEventSchema = z.discriminatedUnion('type', [

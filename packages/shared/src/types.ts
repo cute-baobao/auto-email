@@ -34,8 +34,10 @@ export type RunResponse =
       email_name?: string;
       email_from?: string;
     }
-  | { type: 'stats'; skill: string; panels: StatsPanel[] }
-  | { type: 'text'; skill: string; text: string };
+    | { type: 'stats'; skill: string; panels: StatsPanel[] }
+    | { type: 'text'; skill: string; text: string }
+    | { type: 'db-insert'; table: string; values: Record<string, unknown> }
+    | { type: 'db-query'; table: string; query: { columns?: string[]; where?: { column: string; op: string; value: unknown }[]; orderBy?: string; limit?: number }; result?: Record<string, unknown>[] };
 
 export interface ReplyRecord {
   template: string;
