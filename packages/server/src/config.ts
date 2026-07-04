@@ -10,7 +10,6 @@ const DEFAULT_CONFIG = {
   providers: {
     default: 'deepseek',
     deepseek: { base_url: 'https://api.deepseek.com/v1', model: 'deepseek-chat' },
-    openai: { base_url: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
   },
 };
 

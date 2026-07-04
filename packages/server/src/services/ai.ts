@@ -1,17 +1,27 @@
 import { generateText, stepCountIs, type ModelMessage } from 'ai';
-import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { createDeepSeek, type DeepSeekLanguageModelOptions } from '@ai-sdk/deepseek';
 import { z, type ZodType } from 'zod';
 import type { AppConfig, SkillManifest, RunResponse } from '@hynote/shared';
 import type { AiPort } from '../agent/ai-port';
 
+const DEEPSEEK_PROVIDER_OPTIONS = {
+  deepseek: {
+    thinking: { type: 'enabled' },
+    reasoningEffort: 'high',
+  } satisfies DeepSeekLanguageModelOptions,
+};
+
 function resolveModel(config: AppConfig) {
   const name = config.providers.default;
+  if (name !== 'deepseek') {
+    throw new Error(`Only the 'deepseek' provider is supported (got '${name}')`);
+  }
   const p = config.providers[name];
   if (!p || typeof p === 'string') throw new Error(`Missing provider config: ${name}`);
-  const apiKey = process.env[`${name.toUpperCase()}_API_KEY`];
-  if (!apiKey) throw new Error(`Missing ${name.toUpperCase()}_API_KEY in environment`);
-  const provider = createOpenAICompatible({ name, baseURL: p.base_url, apiKey });
-  return provider(p.model);
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+  if (!apiKey) throw new Error('Missing DEEPSEEK_API_KEY in environment');
+  const ds = createDeepSeek({ apiKey });
+  return ds(p.model);
 }
 
 const replyOutputSchema = z.object({
@@ -61,8 +71,8 @@ async function generateJson<T>(
 ): Promise<T> {
   const { text } = await generateText(
     opts.messages
-      ? { model, system: opts.system, messages: opts.messages }
-      : { model, system: opts.system, prompt: opts.prompt ?? '' },
+      ? { model, system: opts.system, messages: opts.messages, providerOptions: DEEPSEEK_PROVIDER_OPTIONS }
+      : { model, system: opts.system, prompt: opts.prompt ?? '', providerOptions: DEEPSEEK_PROVIDER_OPTIONS },
   );
   return schema.parse(extractJsonObject(text));
 }
@@ -89,6 +99,7 @@ export function createAiService(config: AppConfig): AiPort {
         prompt: input,
         tools,
         stopWhen: stepCountIs(6),
+        providerOptions: DEEPSEEK_PROVIDER_OPTIONS,
       });
       if (skill.output === 'text') {
         return { type: 'text', skill: skill.name, text: gen.text };

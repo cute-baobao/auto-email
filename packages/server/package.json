@@ -6,7 +6,7 @@
   "exports": { ".": "./src/index.ts", "./app": "./src/app.ts" },
   "scripts": { "dev": "bun run --hot src/index.ts" },
   "dependencies": {
-    "@ai-sdk/openai-compatible": "^1.0.0",
+    "@ai-sdk/deepseek": "^2.0.35",
     "@hono/zod-validator": "^0.8.0",
     "@hynote/database": "workspace:*",
     "@hynote/shared": "workspace:*",
