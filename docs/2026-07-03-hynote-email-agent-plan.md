@@ -1601,9 +1601,10 @@ git add -A && git commit -m "feat(server): config bootstrap + server entry"
   "bin": { "hynote": "./src/index.tsx" },
   "dependencies": {
     "@hynote/shared": "workspace:*",
-    "@opentui/react": "^0.1.0",
+    "@opentui/core": "^0.2.10",
+    "@opentui/react": "^0.2.10",
     "clipboardy": "^4.0.0",
-    "react": "^19.2.0"
+    "react": "^19.2.6"
   }
 }
 ```
