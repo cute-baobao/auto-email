@@ -2,7 +2,8 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createTestDb, replies, type Db } from '@hynote/database';
+import { createTestDb } from '@hynote/database/test';
+import { replies, type Db } from '@hynote/database';
 import { buildToolRegistry, pickTools } from '../src/agent/tools/index';
 
 let dir: string;

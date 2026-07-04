@@ -19,6 +19,10 @@ describe('template service', () => {
   it('gets raw template', async () => {
     expect(await getTemplate(dir, 'kol-media-support')).toContain('{{firstName}}');
   });
+  it('rejects a template name with path traversal or separators', async () => {
+    await expect(getTemplate(dir, '../secret')).rejects.toThrow(/Invalid template name/);
+    await expect(getTemplate(dir, 'a/b')).rejects.toThrow(/Invalid template name/);
+  });
   it('fills variables and leaves unknown placeholders intact', () => {
     expect(fillTemplate('Hi {{firstName}} {{x}}', { firstName: 'Alex' })).toBe('Hi Alex {{x}}');
   });

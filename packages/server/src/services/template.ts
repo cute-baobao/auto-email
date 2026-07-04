@@ -18,6 +18,9 @@ export async function listTemplates(dir: string): Promise<TemplateInfo[]> {
 }
 
 export async function getTemplate(dir: string, name: string): Promise<string> {
+  if (name.includes('/') || name.includes('\\') || name.includes('..')) {
+    throw new Error(`Invalid template name: ${name}`);
+  }
   return readFile(join(dir, `${name}.md`), 'utf8');
 }
 

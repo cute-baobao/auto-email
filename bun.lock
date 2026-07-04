@@ -31,10 +31,10 @@
       "name": "@hynote/database",
       "version": "0.0.1",
       "dependencies": {
-        "@libsql/client": "^0.14.0",
         "drizzle-orm": "^0.45.2",
       },
       "devDependencies": {
+        "@libsql/client": "^0.14.0",
         "dotenv": "^17.4.2",
         "drizzle-kit": "^0.30.5",
       },

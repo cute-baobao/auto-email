@@ -1,4 +1,4 @@
-import { generateText, generateObject, stepCountIs, type ToolSet } from 'ai';
+import { generateText, generateObject, stepCountIs } from 'ai';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { z } from 'zod';
 import type { AppConfig, SkillManifest, RunResponse } from '@hynote/shared';

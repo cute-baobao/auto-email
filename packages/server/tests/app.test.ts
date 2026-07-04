@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { createTestDb, replies, type Db } from '@hynote/database';
+import { createTestDb } from '@hynote/database/test';
+import { replies, type Db } from '@hynote/database';
 import type { AiPort } from '../src/agent/ai-port';
 import type { RunResponse, SkillManifest } from '@hynote/shared';
 import { createApp } from '../src/app';
