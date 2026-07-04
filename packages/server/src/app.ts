@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { streamSSE } from 'hono/streaming';
 import { zValidator } from '@hono/zod-validator';
 import { RunRequestSchema, ReplyRecordSchema } from '@hynote/shared';
 import { replies, type Db } from '@hynote/database';
@@ -51,6 +52,49 @@ export function createApp(deps: AppDeps) {
     } catch (e) {
       return c.json({ error: (e as Error).message, fallback: 'manual' }, 502);
     }
+  });
+
+  app.post('/api/run/stream', zValidator('json', RunRequestSchema), async (c) => {
+    const { input, skill: skillName } = c.req.valid('json');
+    const skills = await loadSkills(deps.skillsDir);
+    return streamSSE(c, async (stream) => {
+      const ac = new AbortController();
+      stream.onAbort(() => ac.abort());
+      const started = Date.now();
+      try {
+        let chosen = skillName ? skills.find((s) => s.name === skillName) : undefined;
+        if (!chosen && !skillName) {
+          const name = await deps.ai.routeSkill(input, skills);
+          chosen = skills.find((s) => s.name === name);
+        }
+        if (!chosen) {
+          await stream.writeSSE({
+            event: 'error',
+            data: JSON.stringify({ type: 'error', message: `Unknown skill: ${skillName ?? '?'}`, fallback: 'manual' }),
+          });
+          return;
+        }
+        await stream.writeSSE({
+          event: 'skill-selected',
+          data: JSON.stringify({ type: 'skill-selected', skill: chosen.name }),
+        });
+        const registry = buildToolRegistry({ templatesDir: deps.templatesDir, db: deps.db });
+        const tools = pickTools(registry, chosen.allowedTools);
+        for await (const ev of deps.ai.streamSkill(chosen, input, tools, ac.signal)) {
+          await stream.writeSSE({ event: ev.type, data: JSON.stringify(ev) });
+        }
+        await stream.writeSSE({
+          event: 'done',
+          data: JSON.stringify({ type: 'done', durationMs: Date.now() - started }),
+        });
+      } catch (e) {
+        if (ac.signal.aborted) return;
+        await stream.writeSSE({
+          event: 'error',
+          data: JSON.stringify({ type: 'error', message: (e as Error).message, fallback: 'manual' }),
+        });
+      }
+    });
   });
 
   app.post('/api/reply', zValidator('json', ReplyRecordSchema), async (c) => {

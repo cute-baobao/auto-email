@@ -22,6 +22,16 @@ function fakeAi(overrides: Partial<AiPort> = {}): AiPort {
       }
       return { type: 'text', skill: skill.name, text: 'ok' };
     },
+    async *streamSkill(skill) {
+      yield { type: 'skill-selected', skill: skill.name };
+      yield { type: 'tool-call', toolCallId: 't1', toolName: 'template_list', args: {} };
+      yield { type: 'tool-result', toolCallId: 't1', result: [{ name: 'kol-media-support' }] };
+      if (skill.output === 'reply') {
+        yield { type: 'result', result: { type: 'reply', skill: skill.name, template: 'kol-media-support', reply: 'Hi Alex!', metadata: { platform: 'YouTube' }, email_name: 'Alex' } };
+      } else {
+        yield { type: 'result', result: { type: 'text', skill: skill.name, text: 'ok' } };
+      }
+    },
     ...overrides,
   };
 }
@@ -123,6 +133,25 @@ describe('POST /api/run', () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as RunResponse;
     expect(body).toMatchObject({ type: 'text', text: 'plain answer' });
+  });
+});
+
+describe('POST /api/run/stream', () => {
+  it('streams progress events and a final result as SSE', async () => {
+    const app = createApp({ db, templatesDir, skillsDir, ai: fakeAi() });
+    const res = await app.request('/api/run/stream', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ input: 'promote on youtube', skill: 'reply' }),
+    });
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toContain('text/event-stream');
+    const text = await res.text();
+    expect(text).toContain('event: skill-selected');
+    expect(text).toContain('event: tool-call');
+    expect(text).toContain('event: result');
+    expect(text).toContain('event: done');
+    expect(text).toContain('kol-media-support');
   });
 });
 
