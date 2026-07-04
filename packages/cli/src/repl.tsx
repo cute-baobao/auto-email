@@ -2,18 +2,19 @@ import { TextAttributes, type KeyBinding, type TextareaRenderable } from '@opent
 import { useKeyboard } from '@opentui/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import clipboard from 'clipboardy';
-import type { RunResponse, SkillSummary } from '@hynote/shared';
+import type { RunResponse, SkillSummary, RunStreamEvent } from '@hynote/shared';
 import { parseInput } from './slash';
 import {
   getStats,
   listSkills,
   listTemplates,
   ManualFallbackError,
-  runSkill,
+  runSkillStream,
   saveReply,
 } from './client';
 import { StatsView } from './renderers/stats';
 import { ReplyView } from './renderers/reply';
+import { ProgressView, type ProgressState } from './renderers/progress';
 import { TemplatePicker } from './renderers/templates';
 
 const HINT = '输入 /reply 粘贴邮件, /stats 看统计';
@@ -39,6 +40,9 @@ export function Repl() {
   const [mode, setMode] = useState<Mode>('normal');
   const [templates, setTemplates] = useState<{ name: string; body: string }[] | null>(null);
   const [skills, setSkills] = useState<SkillSummary[] | null>(null);
+  const [progress, setProgress] = useState<ProgressState>({ reasoning: '', text: '', tools: [] });
+  const [streaming, setStreaming] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
 
   const resultRef = useRef<RunResponse | null>(null);
   const templatesRef = useRef<{ name: string; body: string }[] | null>(null);
@@ -111,14 +115,52 @@ export function Repl() {
           return;
         }
 
-        setStatus('agent 处理中...');
-        const res = await runSkill(text || trimmed, skill);
-        setResult(res);
-        if (res.type === 'reply') {
-          lastInputRef.current = text || trimmed;
-          setStatus(CONFIRM_HINT);
-        } else {
-          setStatus(HINT);
+        setStatus('agent 处理中…（Esc 取消）');
+        setProgress({ reasoning: '', text: '', tools: [] });
+        setStreaming(true);
+        const ac = new AbortController();
+        abortRef.current = ac;
+        try {
+          const res = await runSkillStream(
+            text || trimmed,
+            skill,
+            (ev: RunStreamEvent) => {
+              setProgress((p) => {
+                if (ev.type === 'reasoning-delta') return { ...p, reasoning: p.reasoning + ev.text };
+                if (ev.type === 'text-delta') return { ...p, text: p.text + ev.text };
+                if (ev.type === 'tool-call')
+                  return { ...p, tools: [...p.tools, { name: ev.toolName, done: false }] };
+                if (ev.type === 'tool-result') {
+                  const tools = [...p.tools];
+                  for (let i = tools.length - 1; i >= 0; i--)
+                    if (!tools[i]!.done) {
+                      tools[i] = { ...tools[i]!, done: true };
+                      break;
+                    }
+                  return { ...p, tools };
+                }
+                return p;
+              });
+            },
+            ac.signal,
+          );
+          setStreaming(false);
+          setProgress({ reasoning: '', text: '', tools: [] });
+          setResult(res);
+          if (res.type === 'reply') {
+            lastInputRef.current = text || trimmed;
+            setStatus(CONFIRM_HINT);
+          } else {
+            setStatus(HINT);
+          }
+        } catch (err) {
+          setStreaming(false);
+          setProgress({ reasoning: '', text: '', tools: [] });
+          if ((err as Error).name === 'AbortError') {
+            setStatus('已取消');
+            return;
+          }
+          throw err;
         }
       } catch (err) {
         if (err instanceof ManualFallbackError) {
@@ -219,6 +261,12 @@ export function Repl() {
   }, []);
 
   useKeyboard((key) => {
+    // Esc cancels an in-flight streaming run.
+    if (streaming && key.name === 'escape') {
+      abortRef.current?.abort();
+      return;
+    }
+
     // Ctrl+N escapes edit or manual-pick back to normal.
     if ((mode === 'edit' || mode === 'pick') && key.ctrl && key.name === 'n') {
       key.preventDefault();
@@ -274,6 +322,8 @@ export function Repl() {
         </box>
 
         {mode === 'pick' && templates && <TemplatePicker templates={templates} />}
+
+        {streaming && <ProgressView state={progress} />}
 
         {result?.type === 'reply' && (
           <ReplyView
