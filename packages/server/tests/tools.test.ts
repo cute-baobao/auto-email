@@ -3,7 +3,7 @@ import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createTestDb, replies, type Db } from '@hynote/database';
-import { buildToolRegistry, pickTools } from './index';
+import { buildToolRegistry, pickTools } from '../src/agent/tools/index';
 
 let dir: string;
 let db: Db;

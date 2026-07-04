@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createTestDb, replies } from '@hynote/database';
-import { queryStats } from './stats';
+import { queryStats } from '../src/services/stats';
 
 async function seed() {
   const db = await createTestDb();

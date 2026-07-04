@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { RunRequestSchema, ReplyRecordSchema } from './schemas';
+import { RunRequestSchema, ReplyRecordSchema } from '../src/schemas';
 
 describe('RunRequestSchema', () => {
   it('accepts input with optional skill', () => {

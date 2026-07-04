@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { createTestDb } from './test-db';
-import { replies } from './schema';
+import { createTestDb } from '../src/test-db';
+import { replies } from '../src/schema';
 
 describe('createTestDb', () => {
   it('creates an in-memory db with the replies table', async () => {

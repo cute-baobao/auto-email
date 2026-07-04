@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { parseSkill, loadSkills } from './skill';
+import { parseSkill, loadSkills } from '../src/agent/skill';
 
 describe('parseSkill', () => {
   it('parses frontmatter and body', () => {

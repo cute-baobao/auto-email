@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { mkdtemp, writeFile, mkdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { listTemplates, getTemplate, fillTemplate } from './template';
+import { listTemplates, getTemplate, fillTemplate } from '../src/services/template';
 
 let dir: string;
 beforeAll(async () => {
