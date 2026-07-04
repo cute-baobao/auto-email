@@ -55,3 +55,13 @@ export interface ProviderConfig {
 export interface AppConfig {
   providers: { default: string } & Record<string, ProviderConfig>;
 }
+
+export type RunStreamEvent =
+  | { type: 'skill-selected'; skill: string }
+  | { type: 'reasoning-delta'; text: string }
+  | { type: 'text-delta'; text: string }
+  | { type: 'tool-call'; toolCallId: string; toolName: string; args: unknown }
+  | { type: 'tool-result'; toolCallId: string; result: unknown }
+  | { type: 'result'; result: RunResponse }
+  | { type: 'error'; message: string; fallback?: 'manual' }
+  | { type: 'done'; durationMs: number };

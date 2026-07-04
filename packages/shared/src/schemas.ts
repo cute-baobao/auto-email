@@ -25,3 +25,42 @@ export const AppConfigSchema = z.object({
     .object({ default: z.string().min(1) })
     .catchall(ProviderConfigSchema),
 });
+
+const RunResponseSchema = z.union([
+  z.object({
+    type: z.literal('reply'),
+    skill: z.string(),
+    template: z.string(),
+    reply: z.string(),
+    metadata: z.record(z.string(), z.string()),
+    email_name: z.string().optional(),
+    email_from: z.string().optional(),
+  }),
+  z.object({
+    type: z.literal('stats'),
+    skill: z.string(),
+    panels: z.array(
+      z.object({
+        title: z.string(),
+        rows: z.array(z.object({ label: z.string(), count: z.number() })),
+      }),
+    ),
+  }),
+  z.object({ type: z.literal('text'), skill: z.string(), text: z.string() }),
+]);
+
+export const RunStreamEventSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('skill-selected'), skill: z.string() }),
+  z.object({ type: z.literal('reasoning-delta'), text: z.string() }),
+  z.object({ type: z.literal('text-delta'), text: z.string() }),
+  z.object({
+    type: z.literal('tool-call'),
+    toolCallId: z.string(),
+    toolName: z.string(),
+    args: z.unknown(),
+  }),
+  z.object({ type: z.literal('tool-result'), toolCallId: z.string(), result: z.unknown() }),
+  z.object({ type: z.literal('result'), result: RunResponseSchema }),
+  z.object({ type: z.literal('error'), message: z.string(), fallback: z.literal('manual').optional() }),
+  z.object({ type: z.literal('done'), durationMs: z.number() }),
+]);
