@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import clipboard from 'clipboardy';
 import type { RunResponse, RunStreamEvent, StatsPanel } from '@hynote/shared';
 import { parseInput } from '../slash';
+import { shouldConfirm } from '../should-confirm';
 import {
   getStats,
   listSkills,
@@ -129,6 +130,7 @@ export function Repl() {
   const [editText, setEditText] = useState('');
 
   const [confirmIndex, setConfirmIndex] = useState(0);
+  const [scrollKey, setScrollKey] = useState(0);
   const confirmIndexRef = useRef(0);
   confirmIndexRef.current = confirmIndex;
 
@@ -150,10 +152,12 @@ export function Repl() {
 
   const addTurn = useCallback((turn: Turn) => {
     setTurns((prev) => [...prev, turn]);
+    setScrollKey((k) => k + 1);
   }, []);
 
   const updateTurn = useCallback((id: number, fn: (t: Turn) => Turn) => {
     setTurns((prev) => prev.map((t) => (t.id === id ? fn(t) : t)));
+    setScrollKey((k) => k + 1);
   }, []);
 
   // Load skills for the dynamic slash menu; stay silent if the server is down.
@@ -285,8 +289,10 @@ export function Repl() {
         setStreaming(false);
         if (res.type === 'reply') {
           updateTurn(id, (t) => ({ ...t, streaming: false, reply: res }));
-          setPending({ turnId: id, reply: res, emailContent: text || raw });
-          setConfirmIndex(0);
+          if (shouldConfirm(res)) {
+            setPending({ turnId: id, reply: res, emailContent: text || raw });
+            setConfirmIndex(0);
+          }
         } else if (res.type === 'stats') {
           updateTurn(id, (t) => ({ ...t, streaming: false, stats: res.panels }));
         } else {
@@ -422,6 +428,7 @@ export function Repl() {
       interruptible
       inputSlot={inputSlot}
       commands={commands}
+      scrollKey={scrollKey}
     >
       <Header />
       {turns.map((turn) => {
