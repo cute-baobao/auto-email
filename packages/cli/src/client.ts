@@ -1,4 +1,6 @@
-import type { RunResponse, ReplyRecord, SkillSummary, StatsPanel } from '@hynote/shared';
+import type { RunResponse, ReplyRecord, SkillSummary, StatsPanel, RunStreamEvent } from '@hynote/shared';
+import { RunStreamEventSchema } from '@hynote/shared';
+import { EventSourceParserStream } from 'eventsource-parser/stream';
 
 const BASE = process.env.HYNOTE_SERVER ?? `http://localhost:${process.env.HYNOTE_PORT ?? 3000}`;
 
@@ -21,6 +23,38 @@ export async function runSkill(input: string, skill?: string): Promise<RunRespon
     throw new Error(body.error ?? `HTTP ${res.status}`);
   }
   return res.json() as Promise<RunResponse>;
+}
+
+export async function runSkillStream(
+  input: string,
+  skill: string | undefined,
+  onEvent: (e: RunStreamEvent) => void,
+  signal: AbortSignal,
+): Promise<RunResponse> {
+  const res = await fetch(`${BASE}/api/run/stream`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(skill ? { input, skill } : { input }),
+    signal,
+  });
+  if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
+
+  const stream = res.body
+    .pipeThrough(new TextDecoderStream())
+    .pipeThrough(new EventSourceParserStream());
+
+  let final: RunResponse | undefined;
+  for await (const chunk of stream) {
+    const ev = RunStreamEventSchema.parse(JSON.parse(chunk.data));
+    onEvent(ev);
+    if (ev.type === 'result') final = ev.result;
+    if (ev.type === 'error') {
+      if (ev.fallback === 'manual') throw new ManualFallbackError(ev.message);
+      throw new Error(ev.message);
+    }
+  }
+  if (!final) throw new Error('Stream ended without a result');
+  return final;
 }
 
 export async function listSkills(): Promise<SkillSummary[]> {
