@@ -6,6 +6,7 @@ import type { AiPort } from './agent/ai-port';
 import { loadSkills } from './agent/skill';
 import { buildToolRegistry, pickTools } from './agent/tools/index';
 import { queryStats, UnknownDimensionError } from './services/stats';
+import { listTemplates, getTemplate } from './services/template';
 
 export interface AppDeps {
   db: Db;
@@ -20,6 +21,14 @@ export function createApp(deps: AppDeps) {
   app.get('/api/skills', async (c) => {
     const skills = await loadSkills(deps.skillsDir);
     return c.json(skills.map((s) => ({ name: s.name, description: s.description, output: s.output })));
+  });
+
+  app.get('/api/templates', async (c) => {
+    const infos = await listTemplates(deps.templatesDir);
+    const templates = await Promise.all(
+      infos.map(async (t) => ({ name: t.name, body: await getTemplate(deps.templatesDir, t.name) })),
+    );
+    return c.json({ templates });
   });
 
   app.post('/api/run', zValidator('json', RunRequestSchema), async (c) => {
