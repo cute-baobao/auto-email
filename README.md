@@ -1,8 +1,8 @@
-# Auto Email (`auto-email`)
+# Auto Email (`auto-email          # 从仓库源码运行，自动起后端，路径解析正常`)
 
 一个常驻终端（TUI）的邮件回复助手：粘贴一封 HyNote Affiliate 邮件，AI 自动选模板、填变量、提取统计标签，你确认后一键复制并入库；也能查回复统计。底层是本地 Hono server + Cloudflare D1，AI 走 DeepSeek（流式，带 thinking）。
 
-- **一条命令启动**：`auto-email` 会自动把后端也拉起来（无需单独跑 server）。
+- **一条命令启动**：`auto-email          # 从仓库源码运行，自动起后端，路径解析正常` 会自动把后端也拉起来（无需单独跑 server）。
 - **UI**：ascii 头部、主题可切换、流式渲染（思考/工具/正文）、确认走输入区选项菜单。
 
 ---
@@ -32,8 +32,8 @@ cp .env.example .env
 bun run db:generate    # 已生成可跳过
 bun run db:push
 
-# 4) 注册全局 hynote 命令
-cd packages/cli && bun link      # 之后任意目录可用 `auto-email`
+# 4) 注册全局 auto-email          # 从仓库源码运行，自动起后端，路径解析正常 命令
+cd packages/cli && bun link      # 之后任意目录可用 `auto-email          # 从仓库源码运行，自动起后端，路径解析正常`
 ```
 
 > `.env` 已在 `.gitignore` 中，密钥不会进版本库。
@@ -43,7 +43,7 @@ cd packages/cli && bun link      # 之后任意目录可用 `auto-email`
 ## 二、用 `auto-email` 命令使用
 
 ```bash
-hynote
+auto-email
 ```
 
 启动时它会：
@@ -78,19 +78,19 @@ hynote
 | `~/.bao-auto-mail/config.json` | 非敏感：默认 provider / model / base_url（当前 deepseek-only） |
 | `~/.bao-auto-mail/templates/*.md` | 4 个回复模板，变量用 `{{firstName}}`，可随意增删改 |
 | `~/.bao-auto-mail/skills/<name>/SKILL.md` | 技能定义（name / description / allowed_tools），可加新技能 |
-| `~/.bao-auto-mail/server.log` | `auto-email` 自动启动的 server 日志（排查用） |
+| `~/.bao-auto-mail/server.log` | `auto-email          # 从仓库源码运行，自动起后端，路径解析正常` 自动启动的 server 日志（排查用） |
 
 ---
 
 ## 四、自己 bundle / 打包
 
-> **重要**：`auto-email` 的「自动起后端」是靠**相对源码路径** spawn `packages/server/src/index.ts` 实现的，所以最省心的分发方式是保留仓库 + `bun link`（下面方式 A）。把 CLI 单独打成一个搬到别处的产物，会让「自动起后端」失效，需要改成「自己起 server + CLI 连过去」（方式 B/C）。
+> **重要**：`auto-email          # 从仓库源码运行，自动起后端，路径解析正常` 的「自动起后端」是靠**相对源码路径** spawn `packages/server/src/index.ts` 实现的，所以最省心的分发方式是保留仓库 + `bun link`（下面方式 A）。把 CLI 单独打成一个搬到别处的产物，会让「自动起后端」失效，需要改成「自己起 server + CLI 连过去」（方式 B/C）。
 
 ### 方式 A（推荐）：`bun link` 从源码跑
 
 ```bash
 cd packages/cli && bun link
-hynote          # 从仓库源码运行，自动起后端，路径解析正常
+auto-email          # 从仓库源码运行，自动起后端，路径解析正常
 ```
 适合个人机器长期使用。要求**仓库保留在原处**（server 源码要能被找到）。
 
@@ -138,6 +138,6 @@ bunx tsc -p packages/<pkg>/tsconfig.json --noEmit   # 类型检查
 ## 六、故障排查
 
 - **进不去 / 一直转**：`cat ~/.bao-auto-mail/server.log` 看后端报错（多半是 `.env` 里 D1 或 DeepSeek key 没填对）。
-- **端口被占**：`lsof -ti:45678` 看谁占了；`auto-email` 会复用已在跑的 server。想换端口设 `AUTO_EMAIL_PORT`（server 和 CLI 都读它）。
-- **退出后 server 残留**：`lsof -ti:45678` 应为空；若非空说明是你自己起的（`dev:server`），`auto-email` 不会关它。
-- **全局 `auto-email` 报找不到 server 入口**：说明 `bun link` 的软链没解析成仓库真实路径导致相对路径失效——用方式 B（自己起 server + CLI 连）临时绕过，并告诉我改成向上查找 workspace 根。
+- **端口被占**：`lsof -ti:45678` 看谁占了；`auto-email          # 从仓库源码运行，自动起后端，路径解析正常` 会复用已在跑的 server。想换端口设 `AUTO_EMAIL_PORT`（server 和 CLI 都读它）。
+- **退出后 server 残留**：`lsof -ti:45678` 应为空；若非空说明是你自己起的（`dev:server`），`auto-email          # 从仓库源码运行，自动起后端，路径解析正常` 不会关它。
+- **全局 `auto-email          # 从仓库源码运行，自动起后端，路径解析正常` 报找不到 server 入口**：说明 `bun link` 的软链没解析成仓库真实路径导致相对路径失效——用方式 B（自己起 server + CLI 连）临时绕过，并告诉我改成向上查找 workspace 根。
