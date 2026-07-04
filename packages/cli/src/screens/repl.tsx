@@ -433,7 +433,11 @@ export function Repl() {
       <Header />
       {turns.map((turn) => {
         const parts: HynoteMessagePart[] = eventsToParts(turn.events);
-        if (turn.reply) parts.push({ type: 'text', text: turn.reply.reply });
+        // Only the canonical filled reply (real email = non-empty template) is
+        // appended; a non-email reply's conversational text already streamed in.
+        if (turn.reply && shouldConfirm(turn.reply)) {
+          parts.push({ type: 'text', text: turn.reply.reply });
+        }
         const showBot = parts.length > 0 || turn.streaming;
         return (
           <box key={turn.id} flexDirection="column" width="100%">
